@@ -112,6 +112,10 @@ or use even `$attr`:
 <sth class:active={condition} />
 ```
 
+```html
+<sth class:active:inactive={condition} />
+```
+
 ## key events
 
 ```html
