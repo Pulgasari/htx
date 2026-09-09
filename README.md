@@ -102,3 +102,26 @@ or use even `$attr`:
 <track 'example2' />
 ```
 
+---
+
+# ideas
+
+## conditional classes
+
+```html
+<sth class:active={condition} />
+```
+
+## key events
+
+```html
+<sth onKey:enter={doSomething} />
+```
+
+```html
+<sth onKey:ctrl+f={doSomething} />
+```
+
+
+
+
