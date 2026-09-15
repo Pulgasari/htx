@@ -1,7 +1,7 @@
 # scratch
 
 ```html
-<htx-obj name='Udo' age='66' country='Germany' />
+<obj name='Udo' age='66' country='Germany' />
 ```
 
 ```html
@@ -93,3 +93,22 @@ export default lib;
 </htx>
 ```
 
+Ja, ich fragte wege.n doppelpunkt weil ich durch diese überlegungen finally bei dieser überlegung landete:
+
+```html
+<!-- @aufbau/elements/htx -->
+<htx-export>
+  <htx-tag:'btn'   is='aufbau-button' attr='label' />
+  <htx-tag:'icon'  is='aufbau-icon'   attr='name' />
+  <htx-tag:'index' is='aufbau-index' />
+</htx-export>
+```
+
+```html
+<htx>
+  <htx-import as='elements' src='https://esm.sh/jsr/@aufbau/elements/htx' />
+  <htx-use:'elements' />
+
+  <icon:'bx:search' />
+</htx>
+```
