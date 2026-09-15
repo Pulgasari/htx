@@ -41,7 +41,8 @@
 ```javascript
 // @aufbau/elements/htx
 const lib = htx`
-  <tmpl tag='icon'  is='aufbau-icon'  attr='name' />
+  <tmpl tag='btn'   is='aufbau-button' attr='label' />
+  <tmpl tag='icon'  is='aufbau-icon'   attr='name'  />
   <tmpl tag='index' is='aufbau-index' />
 `;
 export default lib;
@@ -50,7 +51,8 @@ export default lib;
 ```html
 <!-- @aufbau/elements/htx -->
 <export>
-  <tmpl tag='icon'  is='aufbau-icon'  attr='name' />
+  <tmpl tag='btn'   is='aufbau-button' attr='label' />
+  <tmpl tag='icon'  is='aufbau-icon'   attr='name' />
   <tmpl tag='index' is='aufbau-index' />
 </export>
 ```
