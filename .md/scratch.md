@@ -27,3 +27,11 @@
   <'bird'/>
 </list>
 ```
+
+```html
+<list type='str'>{['cat, 'dog', 'bird']}</list>
+```
+
+```html
+<list items-type='str' items={['cat, 'dog', 'bird']} />
+```
