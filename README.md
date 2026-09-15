@@ -58,7 +58,7 @@ an undefined custom tag evaluates to a `<div>` with a className of that tagName.
 ```html
 <tmpl tag='btn'  is='button' />
 <tmpl tag='href' is='a'      attr='href' />
-<tmpl tag='pic'  is='image'  attr='src'  />
+<tmpl tag='pic'  is='img'    attr='src'  />
 ```
 
 ```xml

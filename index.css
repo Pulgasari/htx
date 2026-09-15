@@ -87,7 +87,7 @@ section { padding: 56px 0; border-top: 1px solid var(--border); }
 h2.title { font-size: clamp(26px, 4vw, 38px); margin: 0 0 10px; letter-spacing: -.01em; }
 .section-lede { color: var(--muted); max-width: 640px; margin: 0 0 34px; }
 
-/* ---- feature grid (rendered from tmpl custom tags) ---- */
+/* ---- feature grid (rendered from htx custom tags) ---- */
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
 .card {
   background: linear-gradient(180deg, var(--panel), var(--bg-2));
