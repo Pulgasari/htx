@@ -23,6 +23,17 @@
 
 ---
 
+- [x] `/lib2` — zweiter ansatz: htx via webcomponents als rahmen/engine
+  - vokabular: `<htx-root>` (engine-host statt `<script type='htx'>` + `autoInit()`), `<htx-tag>` (ex-`<tmpl is=...>`-mapping), `<htx-template>` (ex-`<tmpl>`-vollform), `<htx-use>`/`<htx-pkg>` bewusst noch nicht gebaut (laut notiz "später", für import/export).
+  - neues syntax-sugar: `tag:value` / `tag:'value'` direkt am tagnamen ist eine zweite form des schon vorhandenen 1-positional-arg-sugars (`<tag 'value'>` -> `$attr="value"`) — `<htx-tag:btn ...>` und `<htx-tag:'btn' ...>` sind exakt gleichwertig (verifiziert: identischer compile-output). läuft als eigener pre-pass vor `preParse()`, weil dessen tag-scanner `:` nicht als namenszeichen kennt.
+  - architektur-erkenntnis (direkt aus dem `<script>`-nesting-fund von letztem mal übertragen): `<htx-root>` kann sein DSL nicht als literale light-dom-children halten — der browser-HTML-parser würde `.class`/`'positional'`/`on:click={}` zerlegen, bevor JS drankommt. lösung: `<htx-root>` erwartet genau ein verschachteltes `<script>` (typ egal, empfohlen `text/plain` — kollidiert dann nicht mit lib's `autoInit()`-scan) als roh-text-träger, liest dessen `textContent` in `connectedCallback()` und ersetzt sich selbst mit dem compilierten ergebnis.
+  - implementiert: `lib2/core.js` (colon-sugar-preprocessor + `htx-tag`/`htx-template`-collectDefs, sonst identischer tree/expand/serialize-kern — dafür `parse`/`serialize`/`expand`/`getAttr` aus `lib/core.js` zusätzlich exportiert, keine duplizierte tree-logik), `lib2/root.js` (die `<htx-root>`-webcomponent), `lib2/tag.js` (tagged-template-variante für dieses vokabular, wie erwartet ein simpler wrapper um `lib2/core.js`).
+  - getestet: `lib2/core.js` direkt unter plain node (mapping/template/colon-sugar/fallback-`tag=`-attribut/normale shorthand — alles korrekt), `<htx-root>` per playwright im echten browser (zwei unabhängige instanzen auf einer seite, event-binding via synthetischem klick verifiziert, `data-on-*` wird nach dem binden entfernt wie bei `lib/htx.js`).
+  - `<htx-load src>` ergänzt: fetcht eine `.htx`- oder `.html`-datei, compiliert sie durch den gleichen `lib2/core.js`-kern und ersetzt sich selbst mit dem ergebnis — kein `mode`-attribut nötig, plain html läuft unverändert durch `compile()`. event-binding (`bindEvents`) aus `root.js` in ein gemeinsames `lib2/events.js` gezogen, damit's nicht doppelt existiert.
+  - getestet (playwright, echter fetch über lokalen server): `.htx`-fragment inkl. eigenem `<htx-tag>` und colon-sugar lädt korrekt, verschachteltes `<htx-load>` drin lädt rekursiv ein plain-`.html`-fragment nach (composition funktioniert einfach so, weil neu eingefügte `<htx-load>`-tags automatisch hochgestuft werden), event-binding im geladenen fragment funktioniert; fehlende datei wird über `console.error` gemeldet statt eines uncaught errors.
+
+---
+
 - [x] prüfen ob das zeug in `/lib` jetzt noch irgendwie angepasst werden muss wegen umbenennung
   - `lib/htx.js`: `autoInit()` hat noch nach `script[type="tmpl"]` gesucht statt `type="htx"` — gefixt.
   - fehlermeldungen (`tmpl: ...`) und kommentare in `lib/*.js` liefen noch auf den alten namen — gefixt.
