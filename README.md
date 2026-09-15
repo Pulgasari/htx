@@ -113,10 +113,16 @@ got applied if condition meets `true`.
 <sth class:active={condition} />
 ```
 
+got applied if condition meets `false`.
+
+```html
+<sth class:!inactive={condition} />
+```
+
 if `true` the first got applied. if `false` the second.
 
 ```html
-<sth class:active|inactive={condition} />
+<sth class:active!inactive={condition} />
 ```
 
 ## key events
