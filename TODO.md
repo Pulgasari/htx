@@ -6,6 +6,11 @@
 
 ---
 
+- [ ] methode für alternativen ``htx`<tag>...</tag>`` template syntax
+- [ ] klären, wie man es generell mit JS macht. also zwischen den tags. oder htx-code in JS. component-like zeug usw.
+
+---
+
 - [x] prüfen ob das zeug in `/lib` jetzt noch irgendwie angepasst werden muss wegen umbenennung
   - `lib/htx.js`: `autoInit()` hat noch nach `script[type="tmpl"]` gesucht statt `type="htx"` — gefixt.
   - fehlermeldungen (`tmpl: ...`) und kommentare in `lib/*.js` liefen noch auf den alten namen — gefixt.
