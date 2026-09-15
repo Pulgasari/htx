@@ -3,33 +3,31 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>tmpl — showcase</title>
+<title>htx — showcase</title>
 <link rel="stylesheet" href="./index.css" />
-<link rel="stylesheet" href="./tmpl.css" />
+<link rel="stylesheet" href="./htx.css" />
 </head>
 <body>
 
 <nav class="nav">
-  <div class="brand"><span class="dot"></span> tmpl</div>
+  <div class="brand"><span class="dot"></span> htx</div>
   <div class="links">
     <a href="#features">Features</a>
     <a href="#components">Components</a>
     <a href="#playground">Playground</a>
     <a href="#reference">Reference</a>
-    <a href="https://github.com/pulgasari/tmpl">GitHub</a>
+    <a href="https://github.com/pulgasari/htx">GitHub</a>
   </div>
 </nav>
 
 <!-- =========================================================
-     Everything below is written in tmpl, not HTML. It lives inside a
-     <tmpl-root> web component, which self-upgrades and renders itself —
-     no manual render() call. The inner <script type="text/tmpl"> keeps
-     the source as raw text so the browser's parser can't mangle the
-     shorthands (this also works from file://). To load from a separate
-     file instead, use <tmpl-root src="app.tmpl"></tmpl-root> and serve it.
+     Everything below is written in htx, not HTML. The <script type="htx">
+     tag keeps the source as raw text so the browser's parser can't mangle
+     the shorthands (this also works from file://), and lib/htx.js expands
+     it in place on load — no manual render() call needed.
      ========================================================= -->
 
-<script type="text/tmpl">
+<script type="htx">
 
   <!-- define custom tags: shorthand mappings -->
   <tmpl tag='btn'  is='button' />
@@ -53,12 +51,12 @@
       <span class='badge'>html, with less ceremony</span>
       <h1>write <span class='g'>less markup</span>,<br/>ship the same page.</h1>
       <p.lede>
-        tmpl is a tiny preprocessor: native tags and web components pass through,
+        htx is a tiny preprocessor: native tags and web components pass through,
         custom tags become plain divs, and shorthands cut the noise.
       </p.lede>
       <cta>
         <btn.btn.primary 'Try the playground ↓' on:click={location.hash='#playground'} />
-        <href.btn.ghost 'https://github.com/pulgasari/tmpl'>View source</href.btn.ghost>
+        <href.btn.ghost 'https://github.com/pulgasari/htx'>View source</href.btn.ghost>
       </cta>
     </hero>
 
@@ -112,10 +110,10 @@
   <section id="playground">
     <p class="eyebrow">Live</p>
     <h2 class="title">Playground</h2>
-    <p class="section-lede">Edit the tmpl source on the left. The middle renders live; the right shows the compiled HTML. Try the <code>on:click</code> button.</p>
+    <p class="section-lede">Edit the htx source on the left. The middle renders live; the right shows the compiled HTML. Try the <code>on:click</code> button.</p>
     <div class="play">
       <div class="pane">
-        <div class="head"><span>tmpl source</span></div>
+        <div class="head"><span>htx source</span></div>
         <textarea id="src" spellcheck="false"></textarea>
       </div>
       <div class="pane">
@@ -137,7 +135,7 @@
     <p class="eyebrow">Cheatsheet</p>
     <h2 class="title">Reference</h2>
     <table class="ref">
-      <thead><tr><th>tmpl</th><th class="arrow"></th><th>html</th></tr></thead>
+      <thead><tr><th>htx</th><th class="arrow"></th><th>html</th></tr></thead>
       <tbody>
         <tr><td><code>&lt;box&gt;…&lt;/box&gt;</code></td><td class="arrow">→</td><td><code>&lt;div class="box"&gt;…&lt;/div&gt;</code></td></tr>
         <tr><td><code>&lt;card.hero#main&gt;</code></td><td class="arrow">→</td><td><code>&lt;div class="card hero" id="main"&gt;</code></td></tr>
@@ -152,21 +150,21 @@
 </div>
 
 <footer>
-  <div class="wrap">Built with tmpl · this whole hero &amp; component section is compiled from tmpl at load time.</div>
+  <div class="wrap">Built with htx · this whole hero &amp; component section is compiled from htx at load time.</div>
 </footer>
 
 <div class="toast" id="toast"></div>
 
 <!-- ============================================================
-     Runtime lives in /lib/*.js (ES modules). Importing tmpl.js
-     auto-registers the <tmpl-root> web component, which renders the
-     showcase above. Served over http(s) - e.g. GitHub Pages - so the
-     module import resolves; opening the file via file:// won't (module
-     CORS). For a no-server preview, `python3 -m http.server` then open
+     Runtime lives in /lib/*.js (ES modules). Importing htx.js runs
+     autoInit(), which expands the <script type="htx"> block above in
+     place. Served over http(s) - e.g. GitHub Pages - so the module import
+     resolves; opening the file via file:// won't (module CORS). For a
+     no-server preview, `python3 -m http.server` then open
      http://localhost:8000/.
      ============================================================ -->
 <script type="module">
-  import { compile, render } from './lib/tmpl.js';
+  import { compile, render } from './lib/htx.js';
 
   // ---- playground ----
   const demo = [
