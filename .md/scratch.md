@@ -33,5 +33,5 @@
 ```
 
 ```html
-<list items-type='str' items={['cat, 'dog', 'bird']} />
+<list type='str' items={['cat, 'dog', 'bird']} />
 ```
