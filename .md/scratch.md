@@ -35,3 +35,31 @@
 ```html
 <list type='str' items={['cat, 'dog', 'bird']} />
 ```
+
+## ...
+
+```javascript
+// @aufbau/elements/htx
+const lib = htx`
+  <tmpl tag='icon'  is='aufbau-icon'  attr='name' />
+  <tmpl tag='index' is='aufbau-index' />
+`;
+export default lib;
+```
+
+```html
+<!-- @aufbau/elements/htx -->
+<export>
+  <tmpl tag='icon'  is='aufbau-icon'  attr='name' />
+  <tmpl tag='index' is='aufbau-index' />
+</export>
+```
+
+```html
+<htx>
+  <htx-use src='https://esm.sh/jsr/@aufbau/elements/htx' />
+
+  <icon 'bx:search' />
+</htx>
+```
+
