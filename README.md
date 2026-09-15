@@ -4,7 +4,7 @@ A tiny client-side preprocessor that turns terse, custom-tag markup into real
 HTML. No build step — it runs in the browser.
 
 - live-preview: http://code.pulgasari.dev/htx/
-- with aufbau/elements: http://code.pulgasari.dev/tmpl/aufbau.html
+- with aufbau/elements: http://code.pulgasari.dev/htx/aufbau.html
 
 ## use it in the browser
 
