@@ -58,13 +58,21 @@ const lib = [
 export default lib;
 ```
 
-
 ```html
 <!-- @aufbau/elements/htx -->
 <htx-export>
   <htx-template tag='btn'   is='aufbau-button' attr='label' />
   <htx-template tag='icon'  is='aufbau-icon'   attr='name' />
   <htx-template tag='index' is='aufbau-index' />
+</htx-export>
+```
+
+```html
+<!-- @aufbau/elements/htx -->
+<htx-export>
+  <htx-tag 'btn'   is='aufbau-button' attr='label' />
+  <htx-tag 'icon'  is='aufbau-icon'   attr='name' />
+  <htx-tag 'index' is='aufbau-index' />
 </htx-export>
 ```
 
