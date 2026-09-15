@@ -29,32 +29,24 @@
       </cta>
     </hero>
 
+    <htx-template 'card'>
+      <div.card>
+        <div.ico>$ico</div>
+        <h3>$title</h3>
+        <p>$about</p>
+      </div.card>
+    </htx-template>
+
     <!-- FEATURES: <box> and <card> are undefined -> divs -->
     <section#features>
       <p.eyebrow>Why</p.eyebrow>
       <h2.title>Four ideas, zero build step</h2>
       <p.section-lede>These cards are undefined custom tags. No definitions needed — an unknown tag just turns into a div carrying its own name as a class.</p.section-lede>
       <box.grid>
-        <card>
-          <div.ico>🏷️</div>
-          <h3>Custom tags</h3>
-          <p>Unknown tags collapse to a div with a matching class. Style them however you like.</p>
-        </card>
-        <card>
-          <div.ico>#️⃣</div>
-          <h3>Selector shorthand</h3>
-          <p>Write <code>.class</code> and <code>#id</code> straight on the tag, CSS-style.</p>
-        </card>
-        <card>
-          <div.ico>⚡</div>
-          <h3>Positional args</h3>
-          <p>A bare string right after a tag flows into its mapped attribute or its text.</p>
-        </card>
-        <card>
-          <div.ico>🧩</div>
-          <h3>Reusable templates</h3>
-          <p>Define a tag once with <code>&lt;tmpl&gt;</code> and expand it with placeholders.</p>
-        </card>
+        <card ico='🏷️' title='Custom Tags'        about='Unknown tags collapse to a div with a matching class. Style them however you like.' />
+        <card ico='#️⃣' title='Selector shorthand' about='Write <code>.class</code> and <code>#id</code> straight on the tag, CSS-style.' />
+        <card ico='⚡' title='Positional args'    about='A bare string right after a tag flows into its mapped attribute or its text.' />
+        <card ico='🧩' title='Reusable templates' about='Define a tag once with <code>&lt;tmpl&gt;</code> and expand it with placeholders.' />
       </box.grid>
     </section>
 
