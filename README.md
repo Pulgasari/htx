@@ -1,7 +1,8 @@
 # htx :: spec
 
-A tiny client-side preprocessor that turns terse, custom-tag markup into real
-HTML. No build step — it runs in the browser.
+A tiny preprocessor that turns terse, custom-tag markup into real HTML. No
+build step — the compile core is DOM-free, so it runs the same in the
+browser, node and deno.
 
 - live-preview: http://code.pulgasari.dev/htx/
 - with aufbau/elements: http://code.pulgasari.dev/htx/aufbau.html
@@ -25,6 +26,24 @@ HTML. No build step — it runs in the browser.
 
 `index.html` is a full self-contained showcase (hero, components and a live
 playground) — open it directly in a browser.
+
+## use it in js (node, deno, browser)
+
+```js
+import { compile } from './lib/core.js';
+import htx         from './lib/tag.js';
+
+compile("<card.hero>hello</card.hero>");
+htx`<card.hero>hello ${name}</card.hero>`;
+```
+
+`lib/core.js` is the DOM-free engine (`compile(source) -> html string`) that
+`lib/htx.js` and `lib/tag.js` both build on:
+
+- `lib/htx.js` — the browser "pure" variant: mounts into a real DOM element
+  and wires up `on:event` bindings (`render`, `autoInit`).
+- `lib/tag.js` — the tagged-template variant: just `compile()` wrapped as
+  `` htx`<tag>...</tag>` ``, no mounting, no events.
 
 ## spec
 
