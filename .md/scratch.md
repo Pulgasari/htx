@@ -126,7 +126,15 @@ htx-pkg
 
 ### `<htx-root>`
 
+```xml
+<htx-root>
+  <!-- das mutter-elememt hier steckt auch die haupt engine -->
+</htx-root>
+```
+
 ### `<htx-tag>`
+
+ehem. `<tmpl tag='btn' ...usw... />`
 
 ```xml
 <htx-tag:btn   is='aufbau-button' attr='label' />
@@ -145,6 +153,8 @@ dann kann die webcomponent-library so genutzt werden:
 
 ### `<htx-tmpl>`
 
-### `<htx-pkg>`
+wie die verschachtelte variante von ehem. `<tmpl/>`
 
-### `<htx-use>`
+### `<htx-pkg>` & `<htx-use>`
+
+später für quasi import/export
