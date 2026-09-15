@@ -61,16 +61,25 @@ export default lib;
 
 ```html
 <!-- @aufbau/elements/htx -->
-<export>
+<htx-export>
   <tmpl tag='btn'   is='aufbau-button' attr='label' />
   <tmpl tag='icon'  is='aufbau-icon'   attr='name' />
   <tmpl tag='index' is='aufbau-index' />
-</export>
+</htx-export>
 ```
 
 ```html
 <htx>
   <htx-use src='https://esm.sh/jsr/@aufbau/elements/htx' />
+
+  <icon 'bx:search' />
+</htx>
+```
+
+```html
+<htx>
+  <htx-import as='elements' src='https://esm.sh/jsr/@aufbau/elements/htx' />
+  <htx-use 'elements' />
 
   <icon 'bx:search' />
 </htx>
