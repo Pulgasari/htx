@@ -1,18 +1,17 @@
-# tmpl :: spec
+# htx :: spec
 
 A tiny client-side preprocessor that turns terse, custom-tag markup into real
 HTML. No build step — it runs in the browser.
 
-- live-preview: http://code.pulgasari.dev/tmpl/
+- live-preview: http://code.pulgasari.dev/htx/
 - with aufbau/elements: http://code.pulgasari.dev/tmpl/aufbau.html
 
 ## use it in the browser
 
 ```html
-<script type="module" src="./lib/tmpl.js"></script>
+<script type="module" src="./lib/htx.js"></script>
 
-<!-- inline: works from file:// too -->
-<script type='tmpl'>
+<script type='htx'>
   <tmpl tag='btn' is='button' />
 
   <#app>
@@ -70,7 +69,7 @@ an undefined custom tag evaluates to a `<div>` with a className of that tagName.
 
 ## define custom-tags by template
 
-refer to an custom-tag-attribute with `$attr`.
+refer to an custom-tag-attribute with `$name`.
 
 ```html
 <tmpl tag='track'>
@@ -108,12 +107,16 @@ or use even `$attr`:
 
 ## conditional classes
 
+got applied if condition meets `true`.
+
 ```html
 <sth class:active={condition} />
 ```
 
+if `true` the first got applied. if `false` the second.
+
 ```html
-<sth class:active:inactive={condition} />
+<sth class:active|inactive={condition} />
 ```
 
 ## key events
