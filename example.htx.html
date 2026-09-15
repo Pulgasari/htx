@@ -1,0 +1,74 @@
+<!-- define custom tags: shorthand mappings -->
+<htx-tag:btn  is='button' />
+<htx-tag:href is='a' attr='href' />
+
+<!-- define a custom tag by template ($role / $name are attributes) -->
+<htx-template:person>
+  <div class='avatar'>
+    <span class='ring'>$initial</span>
+    <div>
+      <b>$name</b>
+      <small>$role</small>
+    </div>
+  </div>
+</htx-template:person>
+
+<wrap>
+
+    <!-- HERO: undefined <hero> tag becomes <div class="hero"> -->
+    <hero>
+      <span.badge'>html, with less ceremony</span.badge>
+      <h1>write <span.g>less markup</span.g>,<br/>ship the same page.</h1>
+      <p.lede>
+        htx is a tiny preprocessor: native tags and web components pass through,
+        custom tags become plain divs, and shorthands cut the noise.
+      </p.lede>
+      <cta>
+        <btn.primary 'Try the playground ↓' on:click={location.hash='#playground'} />
+        <href.btn.ghost 'https://github.com/pulgasari/htx'>View source</href.btn.ghost>
+      </cta>
+    </hero>
+
+    <!-- FEATURES: <box> and <card> are undefined -> divs -->
+    <section#features>
+      <p.eyebrow>Why</p.eyebrow>
+      <h2.title>Four ideas, zero build step</h2>
+      <p.section-lede>These cards are undefined custom tags. No definitions needed — an unknown tag just turns into a div carrying its own name as a class.</p.section-lede>
+      <box.grid>
+        <card>
+          <div.ico>🏷️</div>
+          <h3>Custom tags</h3>
+          <p>Unknown tags collapse to a div with a matching class. Style them however you like.</p>
+        </card>
+        <card>
+          <div.ico>#️⃣</div>
+          <h3>Selector shorthand</h3>
+          <p>Write <code>.class</code> and <code>#id</code> straight on the tag, CSS-style.</p>
+        </card>
+        <card>
+          <div.ico>⚡</div>
+          <h3>Positional args</h3>
+          <p>A bare string right after a tag flows into its mapped attribute or its text.</p>
+        </card>
+        <card>
+          <div.ico>🧩</div>
+          <h3>Reusable templates</h3>
+          <p>Define a tag once with <code>&lt;tmpl&gt;</code> and expand it with placeholders.</p>
+        </card>
+      </box.grid>
+    </section>
+
+    <!-- COMPONENTS: template-defined <person> tag, expanded with placeholders -->
+    <section#components>
+      <p.eyebrow>Templates</p.eyebrow>
+      <h2.title>Define once, reuse everywhere</h2>
+      <p.section-lede>Each card below is a single <code>&lt;person&gt;</code> tag. The <code>&lt;tmpl tag='person'&gt;</code> definition up top turns it into the full markup, substituting <code>$name</code>, <code>$role</code> and <code>$initial</code>.</p>
+      <box.people>
+        <person name='Ada Lovelace'   role='Algorithms'   initial='A' />
+        <person name='Grace Hopper'   role='Compilers'    initial='G' />
+        <person name='Alan Turing'    role='Computation'  initial='T' />
+        <person name='Radia Perlman'  role='Networks'     initial='R' />
+      </box.people>
+    </section>
+
+  </wrap>
