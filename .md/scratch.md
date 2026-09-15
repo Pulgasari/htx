@@ -62,9 +62,9 @@ export default lib;
 ```html
 <!-- @aufbau/elements/htx -->
 <htx-export>
-  <tmpl tag='btn'   is='aufbau-button' attr='label' />
-  <tmpl tag='icon'  is='aufbau-icon'   attr='name' />
-  <tmpl tag='index' is='aufbau-index' />
+  <htx-template tag='btn'   is='aufbau-button' attr='label' />
+  <htx-template tag='icon'  is='aufbau-icon'   attr='name' />
+  <htx-template tag='index' is='aufbau-index' />
 </htx-export>
 ```
 
