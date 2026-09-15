@@ -6,14 +6,14 @@
 
 ---
 
-- [ ] methode für alternativen ``htx`<tag>...</tag>`` template syntax
-  - kern-problem: `compile()`/`expand()` in `lib/htx.js` läuft komplett auf echten DOM-nodes (`document.createElement`, `querySelectorAll`, `replaceWith`, ...) — ohne DOM (node/deno) geht das unabhängig von der root-syntax gar nicht.
-  - zwei optionen:
-    1. DOM-shim (linkedom/happy-dom) einbinden — code bleibt fast 1:1, aber neue dependency.
-    2. `compile()` von DOM entkoppeln: statt in einen echten `<div>` zu rendern, gegen einen kleinen eigenen tree (`{tag, attrs, children}`) laufen lassen und am ende serialisieren. dann braucht `compile()` gar kein DOM mehr und läuft identisch in browser/node/deno. nur `render()`/`bindEvents()`/`autoInit()` bleiben browser-only (brauchen ohnehin echte events).
-  - empfehlung: 2., passt zur "tiny, zero-deps"-linie.
-  - `<htx>...</htx>` ist dabei nur eine dateikonvention: ein dünner loader liest die datei als string und schneidet den äußeren `<htx>`/`</htx>`-wrapper per string-trim ab, bevor der rest an `compile()` geht — kein HTML-parser involviert.
-  - wichtig: `<htx>...</htx>` funktioniert NICHT als live-DOM-root im browser. ein gewöhnliches tag hat keine "raw-text"-parsing-regel wie `<script>`/`<style>`/`<textarea>` — der browser würde shorthand wie `.class`, `'positional'`, `on:click={}` schon beim parsen verhunzen, bevor htx.js überhaupt etwas sieht. daher ist die trennung im intro-text (`<script type='htx'>` für browser, `<htx>` nur für umgebungen ohne HTML-parser) genau richtig so.
+- [x] methode für alternativen ``htx`<tag>...</tag>`` template syntax
+  - kern-problem war: `compile()`/`expand()` liefen komplett auf echten DOM-nodes (`document.createElement`, `querySelectorAll`, `replaceWith`, ...) — ohne DOM (node/deno, tagged-template) ging das gar nicht.
+  - umgesetzt: `compile()` von DOM entkoppelt, dritte variante à la "core + template-tag + pure":
+    - `lib/core.js` — der eigentliche DOM-freie pipeline-kern. baut statt eines echten `<div>` einen eigenen kleinen tree (`{tag, attrs, children}`), läuft `collectDefs`/`expand` dagegen und serialisiert am ende zu string. braucht `document` an keiner stelle mehr, läuft 1:1 in browser/node/deno. mit plain `node` durchgetestet (siehe test-batterie unten) — kein DOM-shim nötig, passt zur "tiny, zero-deps"-linie.
+    - `lib/tag.js` — die neue tagged-template-variante: `` htx`<div>...</div>` `` als dünner wrapper um `core.compile()`. genau der hier gesuchte alternative syntax, läuft überall wo `core.js` läuft.
+    - `lib/htx.js` — die "pure"/browser-variante bleibt öffentlich unverändert (`compile`, `render`, `autoInit`), macht jetzt aber nur noch das browser-only mounten (`render`/`autoInit`) + event-binding; `compile` kommt 1:1 aus `core.js`.
+  - dabei einen echten bug gefunden und gefixt: der alte DOM-serializer hat `"` und `&` in attribut-werten nie escaped (browser machen das automatisch bei `innerHTML`) — der neue string-serializer in `core.js` tat das anfangs auch nicht, ist jetzt nachgezogen (`escapeAttr` beim serialisieren), sonst brechen attribute wie `onclick='alert("hi")'`.
+  - offen/klein: das `<htx>...</htx>`-datei-wrapper-format aus der intro-notiz (für `.htx`-dateien in node/deno) ist jetzt trivial nachzuziehen — nur noch ein dünner loader, der den äußeren `<htx>`/`</htx>`-string abschneidet und an `core.compile()` gibt. noch nicht gebaut, aber kein architektur-blocker mehr.
 - [ ] klären, wie man es generell mit JS macht. also zwischen den tags. oder htx-code in JS. component-like zeug usw.
   - getestet (playwright): natives `<script>` zwischen htx-tags landet unverändert im output (steht in `STANDARD_TAGS`, wird nicht angefasst) — pass-through funktioniert grundsätzlich.
   - bug/falle gefunden: ein `<script>...</script>` **innerhalb** des `<script type='htx'>`-wrappers bricht den browser-parser — der browser beendet das äußere script-element beim ersten literalen `</script>`, egal was im `type`-attribut steht. alles danach landet als rohes, unverarbeitetes markup direkt im dokument statt in der htx-pipeline (getestet: nachfolgende tags fielen raus, `</#app>` wurde zum kommentar). → inline-`<script>` kann nicht in den `type='htx'`-block geschachtelt werden.
