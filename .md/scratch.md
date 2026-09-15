@@ -14,7 +14,7 @@
 
 ```html
 <list>
-  <str 'cat   />
+  <str 'cat'   />
   <str 'dog'  />
   <str 'bird' />
 </list>
