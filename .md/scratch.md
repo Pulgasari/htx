@@ -112,3 +112,39 @@ Ja, ich fragte wege.n doppelpunkt weil ich durch diese überlegungen finally bei
   <icon:'bx:search' />
 </htx>
 ```
+
+
+## ansatz 2: htx via wc
+
+```xml
+htx-root
+htx-tag
+htx-tmpl / htx-template
+htx-use
+htx-pkg
+```
+
+### `<htx-root>`
+
+### `<htx-tag>`
+
+```xml
+<htx-tag:btn   is='aufbau-button' attr='label' />
+<htx-tag:icon  is='aufbau-icon'   attr='name' />
+<htx-tag:index is='aufbau-index' />
+```
+
+dann kann die webcomponent-library so genutzt werden:
+
+```xml
+<menu>
+  <icon:'bx:search' on:click={doSth()}     />
+  <icon:'mdi:cog'   on:click={doSthElse()} />
+</menu>
+```
+
+### `<htx-tmpl>`
+
+### `<htx-pkg>`
+
+### `<htx-use>`
