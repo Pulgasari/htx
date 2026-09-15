@@ -48,6 +48,17 @@ const lib = htx`
 export default lib;
 ```
 
+```javascript
+// @aufbau/elements/htx
+const lib = [
+  htx`<tmpl tag='btn'   is='aufbau-button' attr='label' />`,
+  htx`<tmpl tag='icon'  is='aufbau-icon'   attr='name'  />`,
+  htx`<tmpl tag='index' is='aufbau-index' />`,
+];
+export default lib;
+```
+
+
 ```html
 <!-- @aufbau/elements/htx -->
 <export>
