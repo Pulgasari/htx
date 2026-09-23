@@ -12,13 +12,13 @@
  */
 
 import { h, Fragment }         from 'preact';
-import { createHTX, RAW_HTML } from '../index.js';
+import { createHTX, RAW_HTML } from '@htx/htx';
 
 /*
 !html is htx's name for the raw-html escape hatch; preact's own is a prop
 holding a wrapper object. only an element gets the translation — a component is
 not an element, so it keeps the prop and may forward it to the element it
-renders. see RAW_HTML in ../index.js for why the name is ugly.
+renders. see RAW_HTML in @htx/htx for why the name is ugly.
 */
 function hx (type, props, ...children) {
   const raw = props?.[RAW_HTML];
@@ -36,5 +36,15 @@ function hx (type, props, ...children) {
   return h.apply(this, [type, props, ...children]);
 }
 
-export const html = createHtml(hx, Fragment);
+/** the shared instance. use createPreactHtml() for a registry of your own */
+const htx = createHTX(hx, Fragment);
+const createPreactHtml = (options) => createHTX(hx, Fragment, options);
+
+// :::::: ALIASES
+
+const html = htx;
+
+// :::::: EXPORT
+
+export { htx, html, createPreactHtml, RAW_HTML };
 export * from 'preact';

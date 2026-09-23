@@ -427,7 +427,7 @@ function resolveTag (props, entry) {
 
 // :::::: TAG FUNCTION
 
-function createHtml (h, Fragment, { memo = true, tags } = {}) {
+function createHTX (h, Fragment, { memo = true, tags } = {}) {
   const cache      = new Map;
   const normalized = new Map;
   const registry   = {};
@@ -498,5 +498,11 @@ function createHtml (h, Fragment, { memo = true, tags } = {}) {
   return html;
 }
 
-export { createHtml, build, evaluate, POSITIONAL, RAW_HTML };
-export default createHtml;
+// :::::: ALIASES
+
+const createHtml = createHTX;
+
+// :::::: EXPORT
+
+export { createHTX, createHtml, build, evaluate, POSITIONAL, RAW_HTML };
+export default createHTX;

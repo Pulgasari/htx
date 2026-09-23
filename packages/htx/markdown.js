@@ -1,4 +1,4 @@
-// @pulgasari/htx/markdown.js
+// @htx/htx/markdown
 //
 // markdown as nodes rather than as an html string, so <div !html=${…}> is not
 // needed for it and raw html inside the markdown never has to be parsed.
@@ -9,7 +9,7 @@
 // parser nor this walker enters the module graph until something imports it.
 //
 //   const { marked }         = await import('marked');
-//   const { createMarkdown } = await import('@pulgasari/htx/markdown.js');
+//   const { createMarkdown } = await import('@htx/htx/markdown');
 //
 //   html.use({ md: createMarkdown(h, Fragment, { lexer: marked.lexer }) });
 //   html`<article>${html.md(text)}</article>`

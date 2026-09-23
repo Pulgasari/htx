@@ -1,4 +1,4 @@
-// @pulgasari/htx/adapters/vanilla.js
+// @htx/js
 //
 // htx against plain dom. no vdom, no diffing: a template call builds nodes and
 // hands them over, which is what makes it a builder rather than a renderer.
@@ -14,8 +14,8 @@
 
 // :::::: IMPORT
 
-import { updateElement }       from '@domina/methods/updateElement.js';
-import { createHtml, RAW_HTML } from '../index.js';
+import { updateElement }       from '@domina/methods/updateElement';
+import { createHTX, RAW_HTML }  from '@htx/htx';
 
 export const Fragment = Symbol('htx.fragment');
 
@@ -90,7 +90,7 @@ function h (type, props, ...children) {
   return node;
 }
 
-/** the shared instance. use createVanillaHtml() for a registry of your own */ 
+/** the shared instance. use createVanillaHtml() for a registry of your own */
 const htx = createHTX (h, Fragment, { memo: false });
 const createVanillaHtml = (options) => createHTX (h, Fragment, { memo: false, ...options });
 
@@ -104,7 +104,8 @@ html       = htx;
 
 export {
   h, htx, createHTX,
-  html, createVanillaHtml,
+  html, createHtml, createVanillaHtml,
+  RAW_HTML,
 };
 
 export default htx;
