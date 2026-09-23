@@ -17,9 +17,7 @@
 import { updateElement }       from '@domina/methods/updateElement';
 import { createHTX, RAW_HTML }  from '@htx/htx';
 
-export const Fragment = Symbol('htx.fragment');
-
-
+const Fragment = Symbol('htx.fragment');
 
 // :::::: HELPERS
 
@@ -92,20 +90,21 @@ function h (type, props, ...children) {
 
 /** the shared instance. use createVanillaHtml() for a registry of your own */
 const htx = createHTX (h, Fragment, { memo: false });
-const createVanillaHtml = (options) => createHTX (h, Fragment, { memo: false, ...options });
+const createVanillaHTX = (options) => createHTX (h, Fragment, { memo: false, ...options });
 
 // :::::: ALIASES
 
 const 
-createHtml = createHTX,
-html       = htx;
+createHTML = createHTX,
+createVanillaHTML = createVanillaHTX,
+html = htx;
 
 // :::::: EXPORT
 
 export {
-  h, htx, createHTX,
-  html, createHtml, createVanillaHtml,
-  RAW_HTML,
+  htx, createHTX, createVanillaHTX,
+  html, createHTML, createVanillaHTML,
+  h, Fragment, RAW_HTML,
 };
 
 export default htx;
