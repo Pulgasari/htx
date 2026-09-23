@@ -1,3 +1,4 @@
+// @ts-self-types="./index.d.ts"
 // HTX = HTM EXTENDED (but we couldn't name it HTMX lol)
 
 /**
