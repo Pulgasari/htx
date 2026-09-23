@@ -1,16 +1,19 @@
 // @htx/js
-//
-// htx against plain dom. no vdom, no diffing: a template call builds nodes and
-// hands them over, which is what makes it a builder rather than a renderer.
-// re-rendering means replaceChildren() on the subtree, or a diff of your own.
-//
-// two things this adapter has to get right that preact does not:
-//
-//  1. memo: false. evaluate() otherwise caches a fully static subtree and hands
-//     back the identical node on every later call — appending it a second time
-//     would move it out of the first tree instead of building a second one.
-//  2. svg. document.createElement('svg') makes an HTMLUnknownElement, so the
-//     element renders nothing and its attributes are lowercased on the way in.
+
+/*
+htx against plain dom. no vdom, no diffing: a template call builds nodes and
+hands them over, which is what makes it a builder rather than a renderer.
+re-rendering means replaceChildren() on the subtree, or a diff of your own.
+
+two things this adapter has to get right that preact does not:
+
+1. memo: false. evaluate() otherwise caches a fully static subtree and hands
+   back the identical node on every later call — appending it a second time
+   would move it out of the first tree instead of building a second one.
+
+2. svg. document.createElement('svg') makes an HTMLUnknownElement, so the
+   element renders nothing and its attributes are lowercased on the way in.
+*/
 
 // :::::: IMPORT
 
