@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HTX</title>
+  <link rel="stylesheet" href="./index.css" />
+  <script src="https://code.pulgasari.dev/importmap.js"></script>
+</head>
+
+<body class="mobilefix">
+
+  <header>
+	  <!--
+    <nav>
+      <a href="./docs">Docs</a>
+      <a href="#">@GitHub</a>
+    </nav>
+	  -->
+  </header>
+  
+  <div id="welcome">
+    <div id="logo" data-animate="vibrate">
+      HTX
+    </div>
+  </div>
+
+  <footer>
+    <div></div>
+  </footer>
+
+  <script type="module">
+    import aufbau             from '@aufbau/api';
+    import { effect, signal } from '@aufbau/signals';
+    import htx                from '@htx/preact';
+    import * as preact        from 'preact'
+    
+    aufbau.boot({ css: { layout: 'landing' }});
+    aufbau.applyFilter('body', 'glitch-heavy-cyber', { animate: true, frequency: "0.0 0.95", scale: 40, speed: "1.5s" });             
+  </script>
+
+</body>
+</html>
