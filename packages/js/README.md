@@ -7,9 +7,9 @@ is a **builder**, not a renderer. to update, `replaceChildren()` the subtree or
 bring your own diff.
 
 ```javascript
-import { html } from '@htx/js';
+import htx from '@htx/js';
 
-const $panel = html`
+const $panel = htx`
   <section class="panel">
     <h2>${title}</h2>
     <button onClick=${save}>save</button>
