@@ -1,11 +1,17 @@
-# htx
+# HTX
 
 HTX = HTM EXTENDED (but we couldn't name it HTMX lol)
 
-A fork of [htm](https://github.com/developit/htm) with merged props, tag
-selectors, prop groups, shorthand tags and a vanilla DOM adapter.
+a fork of [htm](https://github.com/developit/htm) with some syntax sugar added to it.
 
-## Packages
+- merged props
+- prop groups
+- tag selectors
+- shorthand tags
+- vanilla DOM adapter
+- markdown adapter
+
+## packages
 
 | package | path | |
 |---|---|---|
@@ -20,7 +26,7 @@ import { html } from '@htx/preact';
 
 The core is documented in [`packages/htx/README.md`](packages/htx/README.md).
 
-## Development
+## development
 
 The repo is a deno workspace, so the adapters resolve `@htx/htx` to the local
 package. On publish, deno rewrites that import to `jsr:@htx/htx@^<version>`.
@@ -29,11 +35,15 @@ package. On publish, deno rewrites that import to `jsr:@htx/htx@^<version>`.
 deno task publish:dry     # dry run of the whole workspace
 ```
 
-## Publishing
+## publishing
 
-`.github/workflows/publish-to-jsr.yml` publishes one package per run: Actions,
-*publish to jsr*, *Run workflow*, pick the package. Auth runs over OIDC, so the
-package has to be linked to this repository in its settings on jsr.io first.
+`.github/workflows/publish-to-jsr.yml` publishes one package per run: 
+1. go to `Actions`
+2. click *publish to jsr*
+3. click *run workflow*
+4. pick the package.
 
-Bump `version` in the package's `deno.json` before running it. `@htx/htx` goes
+auth runs over OIDC, so the package has to be linked to this repository in its settings on jsr.io first.
+
+bump `version` in the package's `deno.json` before running it. `@htx/htx` goes
 first whenever an adapter depends on a change in it.
