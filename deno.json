@@ -1,0 +1,10 @@
+{
+  "workspace": [
+    "./packages/htx",
+    "./packages/js",
+    "./packages/preact"
+  ],
+  "tasks": {
+    "publish:dry": "deno publish --dry-run"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "@htx/js",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "exports": "./index.js",
+  "imports": {
+    "@domina/methods": "jsr:@domina/methods@^0.1.0"
+  }
+}

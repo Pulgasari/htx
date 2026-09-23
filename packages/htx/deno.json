@@ -1,0 +1,13 @@
+{
+  "name": "@htx/htx",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.js",
+    "./markdown": "./markdown.js"
+  },
+  "imports": {
+    "@pulgasari/is": "jsr:@pulgasari/is@^1.0.1",
+    "@pulgasari/logger": "jsr:@pulgasari/logger@^1.0.0"
+  }
+}
