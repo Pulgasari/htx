@@ -1,3 +1,4 @@
+// @ts-self-types="./markdown.d.ts"
 // @htx/htx/markdown
 //
 // markdown as nodes rather than as an html string, so <div !html=${…}> is not
