@@ -31,7 +31,7 @@ it out of the first tree instead of building a second one.
 | identifier | |
 |---|---|
 | `htx` / `html` | the shared tag function (both are identical) |
-| `createVanillaHTX(options)` | a tag function with a registry of its own, `{ tags }` |
+| `createVanillaHTX` | a tag function with a registry of its own, `{ tags }` |
 | `h` | the hyperscript the adapter hands to the core |
 | `Fragment` | the fragment type, built as a `DocumentFragment` |
 | `createHTX` | the core factory, re-exported |
