@@ -17,7 +17,7 @@ two things this adapter has to get right that preact does not:
 
 // :::::: IMPORT
 
-import { updateElement }       from '@domina/methods/updateElement.js';
+import updateElement           from '@domina/methods/updateElement.js';
 import { createHTX, RAW_HTML } from '@htx/htx';
 
 const Fragment = Symbol('htx.fragment');
