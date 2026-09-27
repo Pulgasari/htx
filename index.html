@@ -31,11 +31,11 @@
 
   <script type="module">
     import aufbau             from '@aufbau/api';
-    import { effect, signal } from '@aufbau/signals';
+  //import { effect, signal } from '@aufbau/signals';
     import htx                from '@htx/preact';
-    import * as preact        from 'preact'
+  //import * as preact        from 'preact'
     
-    aufbau.boot({ css: { layout: 'landing' }});
+    aufbau.boot({ css: { layout: 'landing', theme: 'zombie' }});
     aufbau.filters.apply('body', 'glitch-heavy-cyber', { animate: true, frequency: "0.0 0.95", scale: 40, speed: "1.5s" });             
   </script>
 
