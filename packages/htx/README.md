@@ -91,10 +91,11 @@ not a group.
 
 ## Shorthand tags
 
-A tag starting with `$` resolves through a registry:
+A tag starting with `$` resolves through a registry. It is defined with the `$`
+as well, so the name reads the same in both places:
 
 ```javascript
-html.define('icon', {
+html.define('$icon', {
   tag   : 'aufbau-icon',
   args  : ['icon', 'size'],    // what the positional values fill, in order
   props : { mode: 'mask' },    // defaults, both optional
@@ -114,20 +115,45 @@ A positional past the declared `args` becomes a child, which is what makes the
 args list optional:
 
 ```javascript
-html.define('em', 'strong');   // a bare tag name is the whole spec
+html.define('$em', 'strong');  // a bare tag name is the whole spec
 html`<$em 'hi' />`             // <strong>hi</strong>
 ```
 
 The same holds for an ordinary tag, so `html`<div 'text' />`` is
 `<div>text</div>`.
 
+## Real tags
+
+A name defined **without** `$` is a real tag, in camelCase for its kebab-case.
+htx only learns what its positional values fill and which defaults it has, the
+tag stays what it is:
+
+```javascript
+html.define({
+  inputColor   : { args: 'value' },
+  embedYoutube : { args: 'src', props: { remember: true } },
+});
+
+html`<input-color 'red' name="c" />`      // <input-color value="red" name="c">
+html`<embed-youtube 'dQw4w9WgXcQ' />`     // <embed-youtube src="dQw4w9WgXcQ" remember>
+```
+
+A tag name has no capitals, so camelCase → kebab-case loses nothing, and a
+module can export the specs under plain names. `tag` is optional here: it
+renders the written tag as another one, e.g. a custom element registered under
+a prefix (`inputColor: { tag: 'x-input-color', args: 'value' }`). Positional
+values past `args` become children, as everywhere.
+
+Plain tags are only looked up once a real tag has been defined, and then it is
+one property read per element.
+
 Several at once, and per-instance registries:
 
 ```javascript
-html.define({ icon: {…}, box: 'div' });
+html.define({ $icon: {…}, $box: 'div', inputColor: { args: 'value' } });
 
 import { createVanillaHtml } from '@htx/js';
-const html = createVanillaHtml({ tags: { icon: {…} } });
+const html = createVanillaHtml({ tags: { $icon: {…} } });
 ```
 
 An unknown `<$foo>` throws rather than rendering an element nobody asked for.

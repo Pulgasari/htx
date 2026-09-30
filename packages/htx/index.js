@@ -376,19 +376,36 @@ function build (statics) {
 // :::::: SHORTHAND TAGS ::::::::::::::::::::::::::::::::::::::::
 
 /*
-a shorthand is a tag whose name starts with $ and resolves through a registry:
+the registry knows two kinds of tags, told apart by the name they are defined under.
 
-  html.define('icon', { tag: 'aufbau-icon', args: ['icon', 'size'], props: { mode: 'mask' } });
+a shorthand is defined with a leading $ and written the same way. it stands for
+another tag:
+
+  html.define('$icon', { tag: 'aufbau-icon', args: ['icon', 'size'], props: { mode: 'mask' } });
 
   <$icon 'bx:search' />          ->  <aufbau-icon icon="bx:search" mode="mask">
   <$icon 'bx:search' '2em' />    ->  <aufbau-icon icon="bx:search" size="2em" mode="mask">
   <$icon 'x' mode="image" />     ->  <aufbau-icon icon="x" mode="image">
+
+a name without $ is a real tag, camelCase for its kebab-case: htx only learns
+what the positional values fill and which defaults it has. `tag` is optional,
+it renders the written tag as another one, e.g. a renamed custom element:
+
+  html.define('inputColor', { args: 'value' });
+
+  <input-color 'red' />          ->  <input-color value="red">
 */
 
-// 'aufbau-icon' | Component | { tag, args?, props? }
+// inputColor -> input-color. a real tag name has no capitals, so nothing is lost
+const kebab = name => name.replace(/[A-Z]/g, char => `-${char.toLowerCase()}`);
+
+/** the registry key of a defined name: $icon stays, inputColor becomes input-color */
+const keyOf = name => name[0] === '$' ? name : kebab(name);
+
+// 'aufbau-icon' | Component | { tag?, args?, props? }. a shorthand needs its tag
 function normalizeTag (spec) {
   if (isString(spec) || isFn(spec)) return { tag: spec, args: [], props: null };
-  if (!isObject(spec)) throw new Error('[htx] a shorthand is a tag name, a component, or { tag, args, props }');
+  if (!isObject(spec)) throw new Error('[htx] a tag spec is a tag name, a component, or { tag, args, props }');
 
   // a single positional needs no array around it
   const args = spec.args ?? [];
@@ -431,11 +448,13 @@ function resolveTag (props, entry) {
 function createHTX (h, Fragment, { memo = true, tags } = {}) {
   const cache      = new Map;
   const normalized = new Map;
-  const registry   = {};
+  const registry   = Object.create(null);
+  let   hasTags    = false;   // any real tag defined, so plain tags skip the lookup until then
 
-  // keyed on the spec object, so reassigning a tag re-normalises it
-  const entryFor = (name) => {
-    const spec = registry[name] ?? registry['$' + name];
+  // keyed on the spec object, so reassigning a tag re-normalises it. the key is
+  // '$icon' for a shorthand and 'input-color' for a real tag
+  const entryFor = (key) => {
+    const spec = registry[key];
     if (!spec) return null;
 
     let entry = normalized.get(spec);
@@ -449,16 +468,22 @@ function createHTX (h, Fragment, { memo = true, tags } = {}) {
     let entry = null;
 
     if (shorthand) {
-      entry = entryFor(type.slice(1));
+      entry = entryFor(type);
       // silently rendering a <$foo> element would be a typo nobody finds: as a
       // tag name it is invalid for createElement and merely unknown to a vdom
-      if (!entry) throw new Error(`[htx] unknown shorthand tag <${type}>`);
+      if (!entry?.tag) throw new Error(`[htx] unknown shorthand tag <${type}>`);
       type = entry.tag;
+    }
+
+    // a real tag defined without $: its args and defaults, maybe another name to render under
+    else if (isString(type) && hasTags) {
+      entry = entryFor(type);
+      if (entry?.tag) type = entry.tag;
     }
 
     // a positional on a plain tag has nowhere to go but the children, which
     // makes <div 'text' /> read as <div>text</div>
-    if (!shorthand && !props?.[POSITIONAL]) return h.apply(this, [type || Fragment, finalize(props), ...children]);
+    if (!entry && !props?.[POSITIONAL]) return h.apply(this, [type || Fragment, finalize(props), ...children]);
 
     const [resolved, extra] = resolveTag(props, entry);
     return h.apply(this, [type || Fragment, finalize(resolved), ...extra, ...children]);
@@ -472,9 +497,13 @@ function createHTX (h, Fragment, { memo = true, tags } = {}) {
     return result.length > 1 ? result : result[0];
   }
 
-  /** define('icon', spec) or define({ icon: spec, box: spec }) */
+  /** define('$icon', spec), define('inputColor', spec) or define({ $icon: spec, inputColor: spec }) */
   html.define = (name, spec) => {
-    Object.assign(registry, isString(name) ? { [name]: spec } : name);
+    const specs = isString(name) ? { [name]: spec } : name;
+    for (const [key, value] of Object.entries(specs)) {
+      registry[keyOf(key)] = value;
+      if (key[0] !== '$') hasTags = true;
+    }
     return html;
   };
 
