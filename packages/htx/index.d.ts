@@ -9,12 +9,16 @@ export type Props = Record<string, any>;
  */
 export type H<T = unknown> = (this: unknown, type: any, props: Props | null, ...children: any[]) => T;
 
-/** a shorthand is a tag name, a component, or a full spec. */
+/**
+ * a tag spec is a tag name, a component, or a full spec. defined under '$name'
+ * it is a shorthand and needs its tag; under a camelCase name it is the real
+ * tag of that name in kebab-case, and `tag` only renders it as another one.
+ */
 export type ShorthandSpec =
   | string
   | ((...args: any[]) => any)
   | {
-    tag: string | ((...args: any[]) => any);
+    tag?: string | ((...args: any[]) => any);
     /** names the positional values fill, in order. a single name needs no array. */
     args?: string | string[];
     /** defaults. a written attribute wins, class and style append. */
@@ -35,11 +39,11 @@ export interface Htx<T = unknown> {
   /** one root yields the node, several roots yield an array. */
   (strings: TemplateStringsArray, ...values: unknown[]): T | T[];
 
-  /** define('icon', spec) or define({ icon: spec, box: spec }). chains. */
+  /** define('$icon', spec), define('inputColor', spec) or define({ $icon: spec, inputColor: spec }). chains. */
   define(name: string, spec: ShorthandSpec): Htx<T>;
   define(tags: ShorthandRegistry): Htx<T>;
 
-  /** the live shorthand registry. */
+  /** the live registry, keyed '$icon' for shorthands and 'input-color' for real tags. */
   readonly tags: ShorthandRegistry;
 
   /** attaches helpers to the tag function. 'define', 'tags' and 'use' are refused. chains. */
