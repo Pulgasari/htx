@@ -14,7 +14,7 @@ an `.htx` file is markup first, and compiles into an ES-module whose default exp
   const { name, size = 'm' } = props;
 </script>
 
-<div.card [id, title]=${name}>
+<div.card id|title=${name}>
   <$icon 'bx:search' />
   <${Badge} label=${size} />
 </div.card>
