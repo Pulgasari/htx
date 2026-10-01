@@ -35,7 +35,7 @@ an `.htx` file is markup first, and compiles into an ES-module whose default exp
 </script>
 
 <div.card id|title=${name}>
-  <:icon 'bx:search' />
+  <svg-icon 'bx:search' />
   <Badge label=${size} />
 </div.card>
 
