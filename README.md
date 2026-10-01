@@ -22,8 +22,8 @@ a fork of [htm](https://github.com/developit/htm) with some syntax sugar added t
 | [`@htx/preact`](https://jsr.io/@htx/preact) | [`packages/preact`](packages/preact) | the preact adapter |
 
 ```javascript
-import { html } from '@htx/js';
-import { html } from '@htx/preact';
+import htx from '@htx/js';
+import htx from '@htx/preact';
 ```
 
 The core is documented in [`packages/htx/README.md`](packages/htx/README.md).
