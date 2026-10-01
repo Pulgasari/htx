@@ -10,11 +10,13 @@ a fork of [htm](https://github.com/developit/htm) with some syntax sugar added t
 - shorthand tags
 - vanilla DOM adapter
 - markdown adapter
+- `.htx` files, markup without `` html`` ``
 
 ## packages
 
 | package | path | |
 |---|---|---|
+| [`@htx/compiler`](https://jsr.io/@htx/compiler) | [`packages/compiler`](packages/compiler) | `.htx` files: markup first, compiled into a component |
 | [`@htx/htx`](https://jsr.io/@htx/htx) | [`packages/htx`](packages/htx) | the core, plus `@htx/htx/markdown` |
 | [`@htx/js`](https://jsr.io/@htx/js) | [`packages/js`](packages/js) | the vanilla DOM adapter |
 | [`@htx/preact`](https://jsr.io/@htx/preact) | [`packages/preact`](packages/preact) | the preact adapter |

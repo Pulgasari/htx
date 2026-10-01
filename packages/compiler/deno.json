@@ -1,0 +1,14 @@
+{
+  "name": "@htx/compiler",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.js",
+    "./esbuild": "./esbuild.js",
+    "./node": "./node.js",
+    "./register": "./register.js"
+  },
+  "imports": {
+    "acorn": "npm:acorn@^8"
+  }
+}
