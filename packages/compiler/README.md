@@ -1,8 +1,8 @@
 # @htx/compiler
 
-htx without the `` html`` ``: an `.htx` file is markup first, the way a svelte
-component is, and compiles into an es module whose default export is the
-component.
+htx without the `` html`...` ``.
+
+an `.htx` file is markup first, and compiles into an ES-module whose default export is the component.
 
 ```html
 <script module>
