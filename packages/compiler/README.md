@@ -24,6 +24,26 @@ an `.htx` file is markup first, and compiles into an ES-module whose default exp
 </style>
 ```
 
+```html
+<script module>
+  export const sizes = ['s', 'm', 'l'];
+</script>
+
+<script>
+  import Badge from './badge.htx';
+  const { name, size = 'm' } = props;
+</script>
+
+<div.card id|title=${name}>
+  <:icon 'bx:search' />
+  <Badge label=${size} />
+</div.card>
+
+<style>
+  .card { display: flex; }
+</style>
+```
+
 ## The file
 
 | part | where it ends up |
