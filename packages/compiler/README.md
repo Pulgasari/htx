@@ -83,6 +83,14 @@ compile(source, { adapter: '@htx/preact', filename: 'card.htx' }).code;
 default. Shorthand tags defined on that shared instance (`html.define(…)`) are
 there in every `.htx` file.
 
+`resolve` maps every import specifier of the scripts, a relative path onto a
+url, say. `@htx/elements` uses it to compile in the browser, where a module
+imported from a blob url has no path of its own.
+
+```javascript
+compile(source, { filename: url, resolve: specifier => specifier.startsWith('.') ? new URL(specifier, url).href : specifier });
+```
+
 **esbuild**
 
 ```javascript
