@@ -1,0 +1,14 @@
+{
+  "name": "@htx/elements",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./index.js",
+    "./load": "./load.js",
+    "./part": "./part.js"
+  },
+  "imports": {
+    "@htx/compiler": "jsr:@htx/compiler@^0.1.0",
+    "@htx/js": "jsr:@htx/js@^0.1.0"
+  }
+}

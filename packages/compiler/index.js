@@ -64,7 +64,7 @@ function fail (message, source, index, filename) {
 
 // card-item.htx -> CardItem. a devtools label only, so anything odd falls back
 function nameOf (filename) {
-  const base = filename.split(/[\\/]/).pop().replace(/\.htx$/, '');
+  const base = filename.split(/[\\/]/).pop().replace(/\.htx(\.html)?$/, '');
   const name = base.replace(/(^|[-_.\s]+)(\w)/g, (_, __, char) => char.toUpperCase());
   return /^[A-Za-z_$][\w$]*$/.test(name) ? name : 'Component';
 }
@@ -87,6 +87,20 @@ function closeHole (source, start, filename) {
   if (!rest.test(source)) throw fail('expected } after the expression', source, node.end, filename);
 
   return rest.lastIndex;
+}
+
+// the module specifiers of a program, run through resolve. the replacements go
+// from the end, so the earlier positions stay true
+const SOURCED = new Set(['ImportDeclaration', 'ExportAllDeclaration', 'ExportNamedDeclaration']);
+
+function rewrite (text, program, resolve, base = 0) {
+  if (!resolve) return text;
+  const sources = program.body.filter(node => SOURCED.has(node.type) && node.source).map(node => node.source).reverse();
+  for (const { start, end, value } of sources) {
+    const next = resolve(value);
+    if (next != null && next !== value) text = text.slice(0, start - base) + JSON.stringify(next) + text.slice(end - base);
+  }
+  return text;
 }
 
 // :::::: SPLIT
@@ -150,7 +164,7 @@ the instance script becomes a function body, but an import can only live at
 module level. so the script is parsed, its imports lifted out and the rest kept
 in order. an export has no meaning inside a function and is refused.
 */
-function lift (block, source, filename) {
+function lift (block, source, filename, resolve) {
   const padded  = ' '.repeat(block.offset) + block.content;
   const imports = [];
   let body      = '';
@@ -162,7 +176,7 @@ function lift (block, source, filename) {
 
   for (const node of program.body) {
     if (node.type === 'ImportDeclaration') {
-      imports.push(padded.slice(node.start, node.end));
+      imports.push(rewrite(padded.slice(node.start, node.end), { body: [node] }, resolve, node.start));
       body += padded.slice(last, node.start);
       last  = node.end;
     }
@@ -176,28 +190,32 @@ function lift (block, source, filename) {
   return { imports, body: body.replace(/^\s*\n/, '').trimEnd() };
 }
 
-function checkModule (block, source, filename) {
+// checks the module script and hands it back with its specifiers resolved
+function moduleOf (block, source, filename, resolve) {
+  const padded = ' '.repeat(block.offset) + block.content;
   let program;
 
-  try         { program = parse(' '.repeat(block.offset) + block.content, ACORN); }
+  try         { program = parse(padded, ACORN); }
   catch (err) { throw fail(err.message.replace(/ \(\d+:\d+\)$/, ''), source, err.pos ?? block.offset, filename); }
 
   const clash = program.body.find(node => node.type === 'ExportDefaultDeclaration');
   if (clash) throw fail('the markup is the default export, <script module> cannot have one', source, clash.start, filename);
+
+  return rewrite(padded, program, resolve).trim();
 }
 
 // :::::: COMPILE
 
 /**
  * compiles the source of an .htx file into the source of an es module whose
- * default export is the component.
+ * default export is the component. resolve, when given, maps every import
+ * specifier of the scripts (a relative path onto a url, say)
  */
-function compile (source, { adapter = '@htx/preact', filename = 'component.htx' } = {}) {
+function compile (source, { adapter = '@htx/preact', filename = 'component.htx', resolve } = {}) {
   const { blocks, markup } = split(source, filename);
 
-  for (const block of blocks.module) checkModule(block, source, filename);
-
-  const instance = blocks.script.map(block => lift(block, source, filename));
+  const modules  = blocks.module.map(block => moduleOf(block, source, filename, resolve));
+  const instance = blocks.script.map(block => lift(block, source, filename, resolve));
   const imports  = instance.flatMap(script => script.imports);
   const body     = instance.map(script => script.body).filter(Boolean);
   const style    = blocks.style.map(block => block.content.trim()).filter(Boolean).join('\n\n');
@@ -205,7 +223,7 @@ function compile (source, { adapter = '@htx/preact', filename = 'component.htx' 
   const lines = [
     `import { html as ${TAG} } from ${JSON.stringify(adapter)};`,
     ...imports,
-    ...blocks.module.map(block => block.content.trim()),
+    ...modules,
     style && `export const style = ${JSON.stringify(style)};`,
     `export default function ${nameOf(filename)} (props) {`,
     // not indented: a multi-line template literal in the script would change its text

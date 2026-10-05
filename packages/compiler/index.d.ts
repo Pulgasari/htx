@@ -5,6 +5,8 @@ export interface CompileOptions {
   adapter?: string;
   /** the file's path: names the component and goes into error messages. default 'component.htx'. */
   filename?: string;
+  /** maps every import specifier of the scripts, e.g. a relative path onto a url. null keeps it. */
+  resolve?: (specifier: string) => string | null | undefined;
 }
 
 export interface CompileResult {
