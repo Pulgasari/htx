@@ -19,6 +19,19 @@ const $panel = htx`
 
 props go through `@domina/methods`, so event handlers, `dataset`, `style` objects and the `appendTo` / `prependTo` shortcuts all work. 
 
+`ref` gets the node once its children are in, a function is called with it,
+an object gets it as `.current` (as in preact):
+
+```html
+<script>
+  let output;
+  const step = by => () => output.value = Number(output.value) + by;
+</script>
+
+<output ref=${node => output = node}>0</output>
+<button onClick=${step(1)}>+</button>
+```
+
 SVG-tags are created in the right namespace, which keeps `viewBox` and friends from being lowercased. the tags shared with HTML (`a`, `script`, `style`, `title`) stay HTML on purpose.
 
 it runs with `memo: false`. `evaluate()` otherwise caches a fully static subtree
