@@ -4,7 +4,8 @@
 // loads the file (load.js, through @htx/js), renders its component and puts the
 // result where the element stands. `as` wraps it first in an element written as a
 // selector, tag#id.class. the data-* of the element are the component's props.
-// a part inside a part loads the same way, once it is in the page.
+// a part inside a part loads the same way, once it is in the page, its src
+// relative to the file it stands in.
 
 import { load } from './load.js';
 
@@ -52,6 +53,13 @@ class HtxPart extends HTMLElement {
       const result = module.default({ ...this.dataset });
       const nodes  = nodesOf(result);
       const as     = this.getAttribute('as');
+
+      // a part inside this file means a path relative to this file, not to the page
+      for (const node of nodes) {
+        const inner = node.querySelectorAll ? [...node.querySelectorAll('htx-part[src]')] : [];
+        if (node.localName === 'htx-part' && node.hasAttribute('src')) inner.push(node);
+        for (const part of inner) part.setAttribute('src', new URL(part.getAttribute('src'), url).href);
+      }
 
       let out = nodes;
       if (as) {

@@ -24,7 +24,7 @@ builds real dom nodes.
 
 | attribute | |
 |---|---|
-| `src` | the file, relative to the page |
+| `src` | the file, relative to the page, or to the file it stands in for a part inside a part |
 | `as` | a wrapper around the result, written as a selector: `section`, `section#media`, `div.row.wide` |
 | `data-*` | the props of the file's component: `data-name="Ada"` is `props.name` |
 

@@ -73,6 +73,10 @@ function h (type, props, ...children) {
   const raw = props?.[RAW_HTML];
   if (raw != null) delete props[RAW_HTML];
 
+  // taken out too, it runs once the children are in, as preact's ref does
+  const ref = props?.ref;
+  if (ref != null) delete props.ref;
+
   const node = !type || type === Fragment ? document.createDocumentFragment() : make(type, props ?? {});
 
   // first, because innerHTML replaces whatever the element already holds
@@ -87,6 +91,10 @@ function h (type, props, ...children) {
   if (raw != null && kids.length) console.warn('[htx] !html together with children: appended after the parsed markup, which preact would instead drop');
 
   if (kids.length) node.append(...kids);
+
+  // a function gets the node, an object gets it as .current
+  if (isFn(ref)) ref(node);
+  else if (ref && typeof ref === 'object') ref.current = node;
 
   return node;
 }
