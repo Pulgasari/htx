@@ -41,11 +41,11 @@ import { parse, parseExpressionAt } from 'acorn';
 
 // :::::: CONSTANTS
 
-const ACORN   = { ecmaVersion: 'latest', sourceType: 'module' };
-const BLOCK   = /<(script|style)(\s[^>]*)?>/y;
-const COMMENT = '<!--';
-const HOLE    = '${';
-const TAG     = '$$htx';
+const ACORN = { ecmaVersion: 'latest', sourceType: 'module' };
+const TAG   = '$$htx';
+
+// what split stops at: a hole, a comment, a block. everything in between is plain markup
+const NEXT  = /\$\{|<!--|<(script|style)(\s[^>]*)?>/g;
 
 // :::::: HELPERS
 
@@ -117,41 +117,40 @@ function split (source, filename) {
   let i        = 0;
 
   while (i < source.length) {
-    if (source.startsWith(HOLE, i)) {
+    NEXT.lastIndex = i;
+    const next = NEXT.exec(source);
+
+    markup += escape(source.slice(i, next ? next.index : source.length));
+    if (!next) break;
+
+    const [found, kind, attributes = ''] = next;
+    i = next.index;
+
+    if (found === '${') {
       const end = closeHole(source, i + 2, filename);
       markup += source.slice(i, end);
       i = end;
-      continue;
     }
 
     // a comment is markup to htx, which drops it. a <script> inside is not a block
-    if (source.startsWith(COMMENT, i)) {
+    else if (found === '<!--') {
       const end = source.indexOf('-->', i + 4);
       if (end < 0) throw fail('unclosed <!--', source, i, filename);
       markup += escape(source.slice(i, end + 3));
       i = end + 3;
-      continue;
     }
 
-    BLOCK.lastIndex = i;
-    const open = BLOCK.exec(source);
-
-    if (open) {
-      const [tag, kind, attributes = ''] = open;
-      const close = source.indexOf(`</${kind}>`, i + tag.length);
+    else {
+      const close = source.indexOf(`</${kind}>`, i + found.length);
       if (close < 0) throw fail(`unclosed <${kind}>`, source, i, filename);
 
-      const content = source.slice(i + tag.length, close);
+      const content = source.slice(i + found.length, close);
       const target  = kind === 'script' && /\smodule\b/.test(attributes) ? 'module' : kind;
 
       // the offset keeps acorn's error positions true to the file
-      blocks[target].push({ content, offset: i + tag.length });
+      blocks[target].push({ content, offset: i + found.length });
       i = close + kind.length + 3;
-      continue;
     }
-
-    markup += escape(source[i]);
-    i++;
   }
 
   return { blocks, markup: markup.trim() };

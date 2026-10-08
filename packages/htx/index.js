@@ -52,40 +52,52 @@ const PROP_SET      = MODE_PROP_SET;
 const PROP_APPEND   = MODE_PROP_APPEND;
 
 // :::::: PROP MERGING
+// class and style collect every write while a tag is built and become one value in
+// finalize. the collection stands under the key itself, so props keeps its shape:
+// a delete would turn it into a slow dictionary object, for htx and for h alike
 
-const CLASSES    = Symbol('classes');
 const POSITIONAL = Symbol('positional');
-const STYLES     = Symbol('styles');
 const RAW_HTML   = '!html';
 
-const isClassKey = (key) => key === 'class' || key === 'className' || key.startsWith('class:');
+class Parts {
+  list = [];   // [key, value], in the order written
+
+  add (key, value) {
+    if (value instanceof Parts) this.list.push(...value.list);
+    else                        this.list.push([key, value]);
+  }
+}
+
+const isClassKey = key => key === 'class' || key === 'className' || key.startsWith('class:');
 
 function addClass (list, value) {
        if (!value) return;
   else if (isString(value)) list.push(value);
   else if  (isArray(value)) for (const item of value) addClass(list, item);
-  else if (isObject(value)) for (const [name, enabled] of Object.entries(value)) if (enabled) list.push(name);      
+  else if (isObject(value)) for (const name in value) if (value[name]) list.push(name);
 }
 
-function collect (props, symbol, key, value) {
-  (props[symbol] || (props[symbol] = [])).push([key, value]);
+function partsOf (props, name) {
+  const parts = props[name];
+  return parts instanceof Parts ? parts : (props[name] = new Parts);
 }
 
 function setProp (props, key, value) {
-       if (key === POSITIONAL) (props[key] || (props[key] = [])).push(value);
-  else if (isClassKey(key)) collect(props, CLASSES, key, value);
-  else if (key === 'style') collect(props, STYLES, key, value);
-  else props[key] = value;
+       if (key === POSITIONAL) (props[key] ??= []).push(value);
+  else if (isClassKey(key))    partsOf(props, 'class').add(key, value);
+  else if (key === 'style')    partsOf(props, 'style').add(key, value);
+  else                         props[key] = value;
 }
 
 function appendProp (props, key, value) {
-  const list = isClassKey(key) ? props[CLASSES] : key === 'style' ? props[STYLES] : null;
+  const name = isClassKey(key) ? 'class' : key === 'style' ? 'style' : null;
 
-  if (!list) { props[key] += value + ''; return; }
+  if (!name) { props[key] += value + ''; return; }
 
   // the entry this append belongs to is the last one written under the same
   // key, not simply the last one: a prop group interleaves its siblings, so
   // class,className="a${x}" writes both before either appends
+  const { list } = props[name];
   let i = list.length - 1;
   while (i > 0 && list[i][0] !== key) i--;
 
@@ -93,40 +105,37 @@ function appendProp (props, key, value) {
   entry[1] = (entry[1] == null ? '' : entry[1]) + value;
 }
 
+function joinClasses (list) {
+  // one plain string, the common case, needs no dedupe
+  const [[key, value]] = list;
+  if (list.length === 1 && isString(value) && !key.startsWith('class:')) return value || undefined;
+
+  const names = [];
+  for (const [key, value] of list) {
+    if (key.startsWith('class:')) { if (value) names.push(key.slice(6)); }
+    else addClass(names, value);
+  }
+  return names.length ? [...new Set(names)].join(' ') : undefined;
+}
+
+// objects merge left to right. a string value discards everything before it,
+// so don't mix the two forms on one element
+function mergeStyles (list) {
+  if (list.length === 1 && isString(list[0][1])) return list[0][1] || undefined;
+
+  let merged;
+  for (const [, value] of list) {
+         if (!value)           continue;
+    else if (isString(value))  merged = value;
+    else if (isObject(merged)) Object.assign(merged, value);
+    else                       merged = { ...value };
+  }
+  return merged || undefined;
+}
+
 function finalize (props) {
-  if (!props) return props;
-
-  const classes = props[CLASSES];
-  const styles  = props[STYLES];
-
-  if (classes) {
-    const list = [];
-    delete props[CLASSES];
-
-    for (const [key, value] of classes) {
-      if (key.startsWith('class:')) { if (value) list.push(key.slice(6)); }
-      else addClass(list, value);
-    }
-
-    if (list.length) props.class = [...new Set(list)].join(' ');
-  }
-
-  if (styles) {
-    let merged = null;
-    delete props[STYLES];
-
-    // objects merge left to right. a string value discards everything before it,
-    // so don't mix the two forms on one element.
-    for (const [, value] of styles) {
-      if (!value) continue;
-      else if (isString(value))  merged = value;
-      else if (isObject(merged)) Object.assign(merged, value);
-      else merged = { ...value };
-    }
-
-    if (merged) props.style = merged;
-  }
-
+  if (props?.class instanceof Parts) props.class = joinClasses(props.class.list);
+  if (props?.style instanceof Parts) props.style = mergeStyles(props.style.list);
   return props;
 }
 
@@ -161,7 +170,7 @@ function evaluate (h, built, fields, args, memo = true) {
       appendProp(args[1], built[++i], value);
     }
     else if (type) {
-      tmp = h.apply(value, evaluate(h, value, fields, ['', null], memo));
+      tmp = h.call(value, evaluate(h, value, fields, ['', null], memo));
       args.push(tmp);
 
       if (value[0] || !memo) {
@@ -420,12 +429,7 @@ function resolveTag (props, entry) {
   // instead of replacing them
   if (entry?.props) for (const key in entry.props) setProp(out, key, entry.props[key]);
 
-  if (props) {
-    for (const key in props) setProp(out, key, props[key]);
-    for (const symbol of [CLASSES, STYLES]) {
-      if (props[symbol]) out[symbol] = [...(out[symbol] ?? []), ...props[symbol]];
-    }
-  }
+  if (props) for (const key in props) setProp(out, key, props[key]);
 
   const positional = props?.[POSITIONAL];
   if (!positional) return [out, []];
@@ -463,11 +467,12 @@ function createHTX (h, Fragment, { memo = true, tags } = {}) {
     return entry;
   };
 
-  const hx = function (type, props, ...children) {
-    const shorthand = isString(type) && type[0] === '$';
+  // args is [type, props, ...children] as evaluate built it, and it is handed on as it is
+  const hx = function (args) {
+    let [type, props] = args;
     let entry = null;
 
-    if (shorthand) {
+    if (isString(type) && type[0] === '$') {
       entry = entryFor(type);
       // silently rendering a <$foo> element would be a typo nobody finds: as a
       // tag name it is invalid for createElement and merely unknown to a vdom
@@ -476,17 +481,22 @@ function createHTX (h, Fragment, { memo = true, tags } = {}) {
     }
 
     // a real tag defined without $: its args and defaults, maybe another name to render under
-    else if (isString(type) && hasTags) {
+    else if (hasTags && isString(type)) {
       entry = entryFor(type);
       if (entry?.tag) type = entry.tag;
     }
 
     // a positional on a plain tag has nowhere to go but the children, which
     // makes <div 'text' /> read as <div>text</div>
-    if (!entry && !props?.[POSITIONAL]) return h.apply(this, [type || Fragment, finalize(props), ...children]);
+    if (entry || props?.[POSITIONAL]) {
+      const [resolved, extra] = resolveTag(props, entry);
+      props = resolved;
+      if (extra.length) args.splice(2, 0, ...extra);
+    }
 
-    const [resolved, extra] = resolveTag(props, entry);
-    return h.apply(this, [type || Fragment, finalize(resolved), ...extra, ...children]);
+    args[0] = type || Fragment;
+    args[1] = finalize(props);
+    return h.apply(this, args);
   };
 
   function html (statics) {
