@@ -14,37 +14,25 @@
 import { h, Fragment }         from 'preact';
 import { createHTX, RAW_HTML } from '@htx/htx';
 
-/*
-!html is htx's name for the raw-html escape hatch; preact's own is a prop
-holding a wrapper object. only an element gets the translation — a component is
-not an element, so it keeps the prop and may forward it to the element it
-renders. see RAW_HTML in @htx/htx for why the name is ugly.
-*/
 function hx (type, props, ...children) {
   const raw = props?.[RAW_HTML];
 
   if (raw != null && typeof type === 'string') {
     delete props[RAW_HTML];
     props.dangerouslySetInnerHTML = { __html: raw };
-
-    // preact renders the markup and drops these on the floor
     if (children.length) console.warn('[htx] !html together with children: preact drops the children');
   }
 
-  // `this` carries htm's staticness bit field. preact ignores it, but an
-  // adapter has no business swallowing it
   return h.apply(this, [type, props, ...children]);
 }
 
-/** the shared instance. use createPreactHtml() for a registry of your own */
-const htx = createHTX(hx, Fragment);
-const createPreactHtml = (options) => createHTX(hx, Fragment, options);
+export const 
+htx = createHTX (hx, Fragment),
+createPreactHTX = (options) => createHTX (hx, Fragment, options),
+// aliases
+createPreactHtx = createPreactHTX,
+html = htx;
 
-// :::::: ALIASES
-
-const html = htx;
-
-// :::::: EXPORT
-
-export { htx, html, createPreactHtml, RAW_HTML };
 export * from 'preact';
+export { htx, createPreactHTX, RAW_HTML };
+export default htx;
