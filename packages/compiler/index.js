@@ -21,7 +21,7 @@ the characters a template literal would read differently (\ and `).
     const { name } = props;
   </script>
 
-  <div.card [id, title]=${name}>
+  <div.card id|title=${name}>
     <$icon 'bx:search' />
   </div.card>
 
@@ -31,7 +31,7 @@ becomes
   import Icon from './icon.htx';
   export default function Card (props) {
     const { name } = props;
-    return $$htx`<div.card [id, title]=${name}> … </div.card>`;
+    return $$htx`<div.card id|title=${name}> … </div.card>`;
   }
 */
 

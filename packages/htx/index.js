@@ -22,17 +22,17 @@ modified fork of htm (developit/htm). changes vs upstream:
 - empty tag (<>...</>) falls back to Fragment
 - class accepts string | array | object
 - style accepts object
-- a prop group — [id, title]='x' — writes one value to several names
+- a prop group — id|title='x' — writes one value to several names
 - a tag selector — <div#main.card.big> — sets id and class
 - !html names the raw-html escape hatch, which each adapter then writes
 */
 
-// :::::: IMPORTS
+// :::::: HELPERS
 
-import { isArray, isFn, isObject, isString } from '@pulgasari/is';
-import { Logger } from '@pulgasari/logger';
-
-const logger = new Logger ({ prefix: 'HTX' });
+const isArray  = Array.isArray;
+const isFn     = value => typeof value === 'function';
+const isString = value => typeof value === 'string';
+const isObject = value => value !== null && typeof value === 'object' && !isArray(value);
 
 // :::::: CONSTANTS
 
@@ -96,7 +96,7 @@ function appendProp (props, key, value) {
 
   // the entry this append belongs to is the last one written under the same
   // key, not simply the last one: a prop group interleaves its siblings, so
-  // class,className="a${x}" writes both before either appends
+  // class|className="a${x}" writes both before either appends
   const { list } = props[name];
   let i = list.length - 1;
   while (i > 0 && list[i][0] !== key) i--;
@@ -193,20 +193,13 @@ function evaluate (h, built, fields, args, memo = true) {
 /*
 a prop group writes one value to several names:
 
-  <$box [id, title]='example' />   ->  id='example' title='example'
-  <$box id,title='example' />
-  <$box id|title='example' />
+  <$box id|title='example' />   ->  id='example' title='example'
 */
 
-const SEPARATOR = /[,|]/;
-
 function splitProp (name) {
-  const bracketed = name[0] === '[';
+  if (!name.includes('|')) return [name];
 
-  if (!bracketed && !SEPARATOR.test(name)) return [name];
-  if (bracketed && name[name.length - 1] !== ']') throw new Error(`[htx] unclosed prop group '${name}'`);
-
-  const names = (bracketed ? name.slice(1, -1) : name).split(SEPARATOR);
+  const names = name.split('|');
   if (names.some(part => !part)) throw new Error(`[htx] malformed prop group '${name}'`);
 
   return names;
@@ -241,7 +234,7 @@ function splitSelector (name) {
 
     if (sigil === '.') classes.push(value);
     else if (!id) id = value;
-    else logger.warn(`<${name}> has more than one id: keeping '#${id}', ignoring '#${value}'`);
+    else console.warn(`[htx] <${name}> has more than one id: keeping '#${id}', ignoring '#${value}'`);
   }
 
   return { tag: tag || 'div', id, classes };
@@ -256,7 +249,6 @@ function build (statics) {
   let current = [0];
   let quote   = '';
   let quoted  = false;
-  let group   = false;
 
   const commit = field => {
     if (mode === MODE_TEXT && (field || (buffer = buffer.replace(/^\s*\n\s*|\s*\n\s*$/g, '')))) {
@@ -301,7 +293,6 @@ function build (statics) {
 
     buffer = '';
     quoted = false;
-    group  = false;
   };
 
   for (let i = 0; i < statics.length; i++) {
@@ -345,7 +336,6 @@ function build (statics) {
         mode   = MODE_PROP_SET;
         names  = splitProp(buffer);
         buffer = '';
-        group  = false;
       }
       else if (char === '/' && (mode < MODE_PROP_SET || statics[i][j + 1] === '>')) {
         commit();
@@ -354,19 +344,10 @@ function build (statics) {
         (current = current[0]).push(CHILD_RECURSE, 0, mode);
         mode = MODE_SLASH;
       }
-      // a bracketed prop group — [id, title]='x' — is a single token although
-      // it may hold whitespace, so the brackets suspend the space boundary
-      else if (char === '[' && mode === MODE_WHITESPACE && !buffer) {
-        group  = true;
-        buffer = char;
-      }
-      else if (char === ']' && group) {
-        group   = false;
-        buffer += char;
-      }
       else if (char === ' ' || char === '\t' || char === '\n' || char === '\r') {
         // <a disabled>
-        if (!group) { commit(); mode = MODE_WHITESPACE; }
+        commit();
+        mode = MODE_WHITESPACE;
       }
       else buffer += char;
 
