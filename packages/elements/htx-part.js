@@ -1,11 +1,15 @@
 // @htx/elements/part.js
 // <htx-part src="./media.htx.html" as="section#media"></htx-part>
-//
-// loads the file (load.js, through @htx/js), renders its component and puts the
-// result where the element stands. `as` wraps it first in an element written as a
-// selector, tag#id.class. the data-* of the element are the component's props.
-// a part inside a part loads the same way, once it is in the page, its src
-// relative to the file it stands in.
+
+/*
+loads the file (load.js, through @htx/js), renders its component
+and puts the result where the element stands. 
+
+`as` wraps it first in an element written as a.selector, tag#id.class. 
+the data-* of the element are the component's props.
+a part inside a part loads the same way, once it is in the page, 
+its src relative to the file it stands in.
+*/
 
 import { load } from './load.js';
 
