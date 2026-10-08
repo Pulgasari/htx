@@ -1,4 +1,4 @@
-// @htx/elements/part.js
+// @htx/elements/htx-part.js
 // <htx-part src="./media.htx.html" as="section#media"></htx-part>
 
 /*

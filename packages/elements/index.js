@@ -3,4 +3,4 @@
 // importing it defines <htx-part>.
 
 export { load }              from './load.js';
-export { HtxPart, settled }  from './part.js';
+export { HtxPart, settled }  from './htx-part.js';

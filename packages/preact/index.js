@@ -14,16 +14,17 @@
 import { h, Fragment }         from 'preact';
 import { createHTX, RAW_HTML } from '@htx/htx';
 
-function hx (type, props, ...children) {
+// the arguments go on to preact as they are, only props is changed in place
+function hx (type, props) {
   const raw = props?.[RAW_HTML];
 
   if (raw != null && typeof type === 'string') {
     delete props[RAW_HTML];
     props.dangerouslySetInnerHTML = { __html: raw };
-    if (children.length) console.warn('[htx] !html together with children: preact drops the children');
+    if (arguments.length > 2) console.warn('[htx] !html together with children: preact drops the children');
   }
 
-  return h.apply(this, [type, props, ...children]);
+  return h.apply(this, arguments);
 }
 
 export const 
@@ -34,5 +35,5 @@ createPreactHtx = createPreactHTX,
 html = htx;
 
 export * from 'preact';
-export { htx, createPreactHTX, RAW_HTML };
+export { RAW_HTML };
 export default htx;
