@@ -160,8 +160,9 @@ function evaluate (h, built, fields, args, memo = true) {
       args[0] = value;
     }
     else if (type === PROPS_ASSIGN) {
+      // a nullish spread adds nothing, as Object.assign in htm has it
       const props = args[1] || (args[1] = {});
-      for (const key of Object.keys(value)) setProp(props, key, value[key]);
+      for (const key of Object.keys(value ?? {})) setProp(props, key, value[key]);
     }
     else if (type === PROP_SET) {
       setProp(args[1] || (args[1] = {}), built[++i], value);
