@@ -96,3 +96,12 @@ of the file, so the compiler stays as it is:
 - compiling on the server or in a build step (`@htx/compiler/esbuild`) instead of
   the browser, with the same files: then acorn and the compile step are no longer
   shipped.
+
+---
+
+# more elements ?
+
+```md
+<htx-clone>
+<htx-copy>
+```
