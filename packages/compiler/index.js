@@ -43,9 +43,7 @@ import { parse, parseExpressionAt } from 'acorn';
 
 const ACORN = { ecmaVersion: 'latest', sourceType: 'module' };
 const TAG   = '$$htx';
-
-// what split stops at: a hole, a comment, a block. everything in between is plain markup
-const NEXT  = /\$\{|<!--|<(script|style)(\s[^>]*)?>/g;
+const NEXT  = /\$\{|<!--|<(script|style)(\s[^>]*)?>/g; // what split stops at: a hole, a comment, a block. everything in between is plain markup
 
 // :::::: HELPERS
 
@@ -213,11 +211,11 @@ function moduleOf (block, source, filename, resolve) {
 function compile (source, { adapter = '@htx/preact', filename = 'component.htx', resolve } = {}) {
   const { blocks, markup } = split(source, filename);
 
-  const modules  = blocks.module.map(block => moduleOf(block, source, filename, resolve));
-  const instance = blocks.script.map(block => lift(block, source, filename, resolve));
-  const imports  = instance.flatMap(script => script.imports);
-  const body     = instance.map(script => script.body).filter(Boolean);
-  const style    = blocks.style.map(block => block.content.trim()).filter(Boolean).join('\n\n');
+  const modules  = blocks.module.map (block => moduleOf (block, source, filename, resolve));
+  const instance = blocks.script.map (block => lift     (block, source, filename, resolve));
+  const imports  = instance.flatMap  (script => script.imports);
+  const body     = instance.map      (script => script.body).filter(Boolean);
+  const style    = blocks.style.map  (block => block.content.trim()).filter(Boolean).join('\n\n');
 
   const lines = [
     `import { html as ${TAG} } from ${JSON.stringify(adapter)};`,
