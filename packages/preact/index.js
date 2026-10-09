@@ -27,13 +27,12 @@ function hx (type, props) {
   return h.apply(this, arguments);
 }
 
-export const 
-htx = createHTX (hx, Fragment),
+const 
 createPreactHTX = (options) => createHTX (hx, Fragment, options),
-// aliases
-createPreactHtx = createPreactHTX,
-html = htx;
+htx  = createHTX (hx, Fragment),
+html = htx; // alias
 
 export * from 'preact';
-export { RAW_HTML };
+export * from 'preact/hooks';
+export { createPreactHTX, htx, html, RAW_HTML };
 export default htx;
