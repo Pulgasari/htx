@@ -271,7 +271,8 @@ and positional values are resolved in it; an `h`-adapter never needs it.
 ```javascript
 import { program } from '@htx/htx';
 
-program`<p.note title=${a}>${b}</p>`
+const parse = strings => program(strings);   // a tag call would hand the first value over as `tags`
+parse`<p.note title=${a}>${b}</p>`
 // { nodes: [{ tag: 'p', props: [['class', ['note']], ['title', { hole: 0 }]], children: [{ hole: 1 }] }] }
 ```
 
