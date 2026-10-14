@@ -7,6 +7,7 @@
 //     manifests : [{ manifest: json, source: '/app/node_modules/@aufbau/elements/custom-elements.json' }],
 //     tags      : { $icon: { tag: 'aufbau-icon', args: ['icon', 'size'], location } },
 //     partial   : false,   // true: some html.define() could not be read, unknown shorthands are no error
+//     classes   : ['card', 'active'],   // class names for selectors and class="", see classesOf(css)
 //   });
 
 import { ATTRIBUTES, SVG_TAGS, TAGS, VALUES, mdn } from './html.js';
@@ -40,7 +41,15 @@ function infoOf (tag, custom) {
   return { attributes: new Map, description: '', events: [], kind: tag.includes('-') ? 'custom-unknown' : 'unknown', members: new Map, slots: [], tag };
 }
 
-function createContext ({ manifests = [], partial = false, tags = {} } = {}) {
+// the class names a stylesheet defines: .name in its selectors, not in urls, strings or numbers
+function classesOf (css) {
+  const names = new Set;
+  const clean = css.replace(/\/\*[\s\S]*?\*\//g, '').replace(/url\([^)]*\)/g, '').replace(/(["'])(?:\\.|(?!\1).)*\1/g, '');
+  for (const [, name] of clean.matchAll(/\.(-?[_a-zA-Z][\w-]*)/g)) names.add(name);
+  return names;
+}
+
+function createContext ({ classes = [], manifests = [], partial = false, tags = {} } = {}) {
   const custom = new Map;
   for (const entry of manifests) {
     if (entry?.modules) readManifest(entry, null, custom);
@@ -65,8 +74,8 @@ function createContext ({ manifests = [], partial = false, tags = {} } = {}) {
     return { ...infoOf(entry?.tag ?? element.tag, custom), via: entry };
   }
 
-  return { custom, partial, registry, resolve, tag: tag => infoOf(tag, custom) };
+  return { classes: new Set(classes), custom, partial, registry, resolve, tag: tag => infoOf(tag, custom) };
 }
 
-export { createContext, keyOf };
+export { classesOf, createContext, keyOf };
 export default createContext;

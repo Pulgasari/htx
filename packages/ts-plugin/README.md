@@ -11,7 +11,8 @@ Inside `` html`…` `` it adds:
   holes: `onclick=${…}` needs a function, `...${…}` an object, `ref=${…}` a
   function or an object, a hole on an enumerated attribute one of its values
 - **completion:** tags (html, custom elements, shorthand tags), attributes,
-  events and enumerated values
+  events and enumerated values; class names of the project's stylesheets in
+  selectors (`<div.card.|`) and in `class="…"`
 - **hover:** what a tag renders, its attributes, events and slots
 - **definition:** a shorthand tag jumps to its `html.define`, a custom element to
   its module
@@ -50,6 +51,7 @@ or `vtsls`.
 |---|---|
 | html, svg, global attributes, events | built into `@htx/analyzer` |
 | custom elements | `custom-elements.json` in the project root, the `customElements` field of every dependency's `package.json`, and `manifests` |
+| class names | every `.css` below the project root, except `node_modules`, `dist`, `build` |
 | shorthand and defined tags | every `html.define(…)`, `htx.define(…)` and `createHTX(h, F, { tags })` in the program, read statically through the type checker. `import * as elements from '@aufbau/elements/htx'; html.define(elements)` works, a value computed at runtime does not; the registry is then partial and unknown shorthands are warnings |
 
 ## development

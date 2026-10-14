@@ -50,5 +50,9 @@ going after an error. Changes to the htx syntax have to be made in both.
 | `htx-raw` | info | `!html=${…}` |
 | syntax codes | error / warning | from `scan` |
 
+`createContext({ classes })` takes class names (`classesOf(css)` reads them from a
+stylesheet): `complete` then offers them after a `.` in a selector (`<div.card.|`)
+and inside `class="…"`.
+
 `expectationOf(hole, context)` says what a hole should hold (`function`, `object`,
 `function-or-object`, `tag`, `values`), for a host that has a type checker.

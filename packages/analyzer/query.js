@@ -23,6 +23,14 @@ function openElementAt (template, offset) {
 
 // :::::: COMPLETION
 
+// the source text between two offsets, from the static parts the template was scanned from
+function textOf (template, start, end) {
+  const part = template.statics?.find(item => start >= item.start && end <= item.start + item.text.length);
+  return part ? part.text.slice(start - part.start, end - part.start) : '';
+}
+
+const classItems = context => [...context.classes].sort().map(name => ({ detail: 'class', kind: 'value', label: name, sort: '0' }));
+
 function tagItems (context) {
   const items = [];
   for (const [tag, description] of Object.entries(TAGS)) items.push({ detail: description, kind: 'element', label: tag, sort: '2' });
@@ -54,7 +62,17 @@ function complete (template, offset, context) {
   const region = regionAt(template, offset);
   if (!region) return null;
 
-  if (region.kind === 'tagName') return { end: region.end, items: tagItems(context), start: region.start };
+  if (region.kind === 'tagName') {
+    // after a . in a selector (<div.card.|) the classes of the project
+    const name = textOf(template, region.start, region.end);
+    const cut  = offset - region.start;
+    const dot  = name.lastIndexOf('.', cut - 1);
+    if (dot > -1 && dot > name.lastIndexOf('#', cut - 1)) {
+      const next = name.slice(dot + 1).search(/[.#]/);
+      return { end: next < 0 ? region.end : region.start + dot + 1 + next, items: classItems(context), start: region.start + dot + 1 };
+    }
+    return { end: region.end, items: tagItems(context), start: region.start };
+  }
 
   if (region.kind === 'closeName') {
     const element = openElementAt(template, region.start - 2);
@@ -65,6 +83,15 @@ function complete (template, offset, context) {
 
   // inside the open tag, between attributes
   if (region.kind === 'tag' && region.element && offset > region.element.nameRange.end) return { end: offset, items: attributeItems(region.element, context), start: offset };
+
+  // class="a b|": the word under the cursor, from the classes of the project
+  if (region.kind === 'attrValue' && region.attribute.names.some(name => name === 'class' || name === 'className')) {
+    const text  = textOf(template, region.start, region.end);
+    const cut   = offset - region.start;
+    const start = region.start + text.slice(0, cut).search(/\S*$/);
+    const rest  = text.slice(cut).search(/\s/);
+    return { end: rest < 0 ? region.end : offset + rest, items: classItems(context), start };
+  }
 
   if (region.kind === 'attrValue') {
     const info   = context.resolve(region.element);

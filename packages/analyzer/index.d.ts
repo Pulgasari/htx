@@ -49,6 +49,7 @@ export interface Hole extends Range { hole: number; role: string; element?: Elem
 export interface Region extends Range { kind: 'tagName' | 'attrName' | 'attrValue' | 'closeName' | 'tag' | 'text'; element?: Element; attribute?: Attribute }
 
 export interface Template extends Range {
+  statics : Static[];
   nodes   : Node[];
   errors  : Diagnostic[];
   holes   : Hole[];
@@ -81,6 +82,7 @@ export interface TagEntry {
 }
 
 export interface Context {
+  classes  : Set<string>;
   custom   : Map<string, ElementInfo>;
   registry : Map<string, TagEntry>;
   partial  : boolean;
@@ -95,12 +97,17 @@ export interface ContextOptions {
   tags?      : Record<string, unknown>;
   /** some defines could not be read: unknown shorthands are warnings. */
   partial?   : boolean;
+  /** class names for completion in selectors (<div.|) and class="". */
+  classes?   : Iterable<string>;
 }
 
 export interface Item { label: string; kind: string; detail?: string; documentation?: string; insertText?: string; sort?: string }
 
 export declare function scan (statics: Static[], holes?: Range[]): Template;
 export declare function createContext (options?: ContextOptions): Context;
+
+/** The class names a stylesheet defines in its selectors. */
+export declare function classesOf (css: string): Set<string>;
 export declare function analyze (template: Template, context: Context): Diagnostic[];
 export declare function complete (template: Template, offset: number, context: Context): (Range & { items: Item[] }) | null;
 export declare function hover (template: Template, offset: number, context: Context): (Range & { markdown: string }) | null;

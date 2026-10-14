@@ -6,6 +6,7 @@ import { analyze, complete, createContext, definition, hover } from '@htx/analyz
 
 import { collectTags }               from './defines.js';
 import { holeDiagnostics }           from './holes.js';
+import { classesIn }                 from './styles.js';
 import { dirname, join, manifestsOf } from './manifests.js';
 import { templateAt, templatesIn }   from './templates.js';
 
@@ -53,7 +54,7 @@ function createService (ts, info, config) {
     let context = contexts.get(program);
     if (!context) {
       const { partial, tags } = collectTags(ts, program, config().tags);
-      context = createContext({ manifests: manifestsOf(ts, root, config()), partial, tags });
+      context = createContext({ classes: classesIn(ts, root), manifests: manifestsOf(ts, root, config()), partial, tags });
       contexts.set(program, context);
     }
     return context;

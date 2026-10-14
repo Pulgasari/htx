@@ -18,7 +18,7 @@ gets back positions it can show.
 */
 
 export { analyze, expectationOf, valuesFor }       from './analyze.js';
-export { createContext, keyOf }                    from './context.js';
+export { classesOf, createContext, keyOf }         from './context.js';
 export { readManifest, valuesOf }                  from './manifest.js';
 export { complete, definition, hover }             from './query.js';
 export { VOID, elementsOf, regionAt, scan }        from './scan.js';

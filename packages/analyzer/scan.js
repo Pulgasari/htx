@@ -337,7 +337,7 @@ function scan (statics, holes = []) {
     element.end = finish;
   }
 
-  return { end: finish, errors, holes: roles, nodes: root.children, regions, start: statics[0]?.start ?? 0 };
+  return { end: finish, errors, holes: roles, nodes: root.children, regions, start: statics[0]?.start ?? 0, statics };
 }
 
 // the innermost region at an offset; a region holds the offset at its end too,
