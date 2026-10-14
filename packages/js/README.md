@@ -49,3 +49,26 @@ it out of the first tree instead of building a second one.
 | `h` | the hyperscript the adapter hands to the core |
 | `Fragment` | the fragment type, built as a `DocumentFragment` |
 | `RAW_HTML` | `'!html'`, for the spread form |
+
+## renderer
+
+`@htx/js/render` renders htx with [`@domina/render`](https://jsr.io/@domina/render):
+the template is parsed and cloned once, every later render writes only the holes
+that changed. nodes, focus and input values inside survive.
+
+```javascript
+import { html, render, each, when } from '@htx/js/render';
+
+const view = ({ title, items }) => html`
+  <section.card>
+    <h2>${title}</h2>
+    ${when(items.length, () => html`<ul>${each(items, item => item.id, item => html`<li>${item.name}</li>`)}</ul>`)}
+  </section>
+`;
+
+render(container, view(state));   // first call clones, later calls patch
+```
+
+`configure({ effect })` makes a function in a value hole live (`${() => $count}`),
+for a signal library such as `@rat/runtime`. the tag registry is shared with the
+builder: `html.define()` on either is seen by both.

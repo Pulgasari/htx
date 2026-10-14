@@ -1,9 +1,13 @@
 {
   "name": "@htx/js",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "Apache-2.0",
-  "exports": "./index.js",
+  "exports": {
+    ".": "./index.js",
+    "./render": "./render.js"
+  },
   "imports": {
-    "@domina/methods": "jsr:@domina/methods@^0.1.0"
+    "@domina/methods": "jsr:@domina/methods@^0.1.0",
+    "@domina/render": "jsr:@domina/render@^0.1.0"
   }
 }
