@@ -1,0 +1,14 @@
+{
+  "name"        : "@htx/ts-plugin",
+  "version"     : "0.1.0",
+  "description" : "typescript server plugin for htx templates: diagnostics, completion, hover and definition inside html`…`",
+  "license"     : "Apache-2.0",
+  "main"        : "./index.cjs",
+  "files"       : ["index.cjs", "dist", "README.md"],
+  "scripts"     : {
+    "build"   : "esbuild src/index.js --bundle --platform=node --format=cjs --target=node18 --alias:@htx/analyzer=../analyzer/index.js --outfile=dist/plugin.cjs",
+    "prepack" : "npm run build"
+  },
+  "peerDependencies" : { "typescript": ">=5" },
+  "devDependencies"  : { "esbuild": "^0.25.0" }
+}

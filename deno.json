@@ -1,5 +1,6 @@
 {
   "workspace": [
+    "./packages/analyzer",
     "./packages/compiler",
     "./packages/elements",
     "./packages/htx",
