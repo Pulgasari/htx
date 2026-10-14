@@ -520,11 +520,117 @@ function createHTX (h, Fragment, { memo = true, tags } = {}) {
   return html;
 }
 
+// :::::: PROGRAM
+
+/*
+the parsed template as a tree with numbered holes, for a renderer that has to
+know what is static and what comes from an interpolation (@domina/render). an
+h-adapter never needs it: it gets finished values through createHTX(h).
+
+  html`<section.card id=${id}><h2>${title}</h2>${body}</section>`
+
+  { nodes: [{ tag: 'section', props: [['class', ['card']], ['id', { hole: 0 }]], children: [
+      { tag: 'h2', props: [], children: [{ hole: 1 }] },
+      { hole: 2 },
+  ] }] }
+
+a node is a string (text), { hole } (a child value) or { tag, props, children }.
+a tag is a string, a component, or { hole } for an interpolated one. props is a
+list in the order written, so class and style keep every write: [name, value],
+value a static, { hole } or { parts } (text and holes, title="a ${b}"), and
+{ spread } for ...${object}. tag selectors, prop groups, shorthand tags with a
+static name and positional values are resolved here, a renderer only sees plain
+elements. `tags` is the registry of a tag function (html.tags).
+*/
+
+const programs = new Map;   // statics -> Map(registry -> program)
+const NO_TAGS  = {};
+
+function program (statics, tags = null) {
+  let byTags = programs.get(statics);
+  if (!byTags) programs.set(statics, byTags = new Map);
+
+  const key = tags ?? NO_TAGS;
+  let result = byTags.get(key);
+  if (!result) byTags.set(key, result = { nodes: nodesOf(build(statics), tags) });
+  return result;
+}
+
+const holeOf = field => ({ hole: field - 1 });
+
+// the children of a built level: text, holes and elements, fragments flattened
+function nodesOf (built, tags) {
+  const nodes = [];
+  for (let i = 1; i < built.length; i += built[i] === PROP_SET || built[i] === PROP_APPEND ? 4 : 3) {
+    const type  = built[i];
+    const field = built[i + 1];
+    const value = built[i + 2];
+    if (type === CHILD_APPEND)  nodes.push(field ? holeOf(field) : value);
+    if (type === CHILD_RECURSE) nodes.push(...elementOf(value, tags));
+  }
+  return nodes;
+}
+
+function elementOf (built, tags) {
+  let tag = '';
+  let props = [];
+
+  for (let i = 1; i < built.length; i += built[i] === PROP_SET || built[i] === PROP_APPEND ? 4 : 3) {
+    const type  = built[i];
+    const field = built[i + 1];
+    const value = field ? holeOf(field) : built[i + 2];
+
+    if (type === TAG_SET)      tag = value;
+    if (type === PROPS_ASSIGN) props.push({ spread: field - 1 });
+    if (type === PROP_SET)     props.push([built[i + 3], value]);
+    if (type === PROP_APPEND) {
+      const name  = built[i + 3];
+      const entry = props.findLast(item => Array.isArray(item) && item[0] === name);
+      const head  = entry[1]?.parts ?? [entry[1] ?? ''];
+      entry[1] = { parts: [...head, value] };
+    }
+  }
+
+  let children = nodesOf(built, tags);
+
+  // an empty tag is a fragment: its children stand in its place
+  if (tag === '') return children;
+
+  // a shorthand or a defined real tag: defaults first, then what is written, the
+  // positional values fill the declared args and the rest become children
+  let entry = null;
+  if (isString(tag) && tag[0] === '$') {
+    const spec = tags?.[tag];
+    if (!spec) throw new Error(`[htx] unknown shorthand tag <${tag}>`);
+    entry = normalizeTag(spec);
+    if (!entry.tag) throw new Error(`[htx] unknown shorthand tag <${tag}>`);
+  }
+  else if (isString(tag) && tags?.[tag]) entry = normalizeTag(tags[tag]);
+
+  const positional = props.filter(item => Array.isArray(item) && item[0] === POSITIONAL).map(item => item[1]);
+  if (entry || positional.length) {
+    props = props.filter(item => !Array.isArray(item) || item[0] !== POSITIONAL);
+    const written = new Set(props.filter(Array.isArray).map(([name]) => name));
+    const args    = entry?.args ?? [];
+    const extra   = [];
+    positional.forEach((value, index) => {
+      const name = args[index];
+      if (!name) extra.push(value);
+      else if (!written.has(name)) props.push([name, value]);
+    });
+    props    = [...Object.entries(entry?.props ?? {}), ...props];
+    children = [...extra, ...children];
+    if (entry?.tag) tag = entry.tag;
+  }
+
+  return [{ tag, props, children }];
+}
+
 // :::::: ALIASES
 
 const createHtml = createHTX;
 
 // :::::: EXPORT
 
-export { createHTX, createHtml, build, evaluate, POSITIONAL, RAW_HTML };
+export { createHTX, createHtml, build, evaluate, program, POSITIONAL, RAW_HTML };
 export default createHTX;

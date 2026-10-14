@@ -79,3 +79,27 @@ export const POSITIONAL: unique symbol;
 export const RAW_HTML: '!html';
 
 export default createHTX;
+
+/** a value in a program: static, a hole (the nth interpolated value), or text and holes joined. */
+export type ProgramValue = unknown | { hole: number } | { parts: (string | { hole: number })[] };
+
+/** a node of a program: text, a child hole, or an element. */
+export type ProgramNode =
+  | string
+  | { hole: number }
+  | {
+    tag      : string | ((...args: any[]) => any) | { hole: number };
+    props    : ([string | symbol, ProgramValue] | { spread: number })[];
+    children : ProgramNode[];
+  };
+
+/** a parsed template as a tree with numbered holes, for renderers such as @domina/render. */
+export interface Program {
+  nodes: ProgramNode[];
+}
+
+/**
+ * the program of a template literal, cached per literal and registry. tag selectors,
+ * prop groups, static shorthand tags and positional values are resolved.
+ */
+export function program(statics: TemplateStringsArray | readonly string[], tags?: ShorthandRegistry | null): Program;

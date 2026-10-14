@@ -260,3 +260,18 @@ export const html = createHTX(h, Fragment, { memo: true, tags: {} });
 `h(type, props, ...children)` is called bottom up. `memo` defaults to `true`,
 which is what a vdom wants. `tags` seeds the shorthand registry. `createHtml`
 is an alias of `createHTX`.
+
+## Programs
+
+`program(strings, tags)` returns a template as a tree with numbered holes, for a
+renderer that has to know what is static (`@domina/render`, used by
+`@htx/js/render`). Tag selectors, prop groups, shorthand tags with a static name
+and positional values are resolved in it; an `h`-adapter never needs it.
+
+```javascript
+import { program } from '@htx/htx';
+
+program`<p.note title=${a}>${b}</p>`
+// { nodes: [{ tag: 'p', props: [['class', ['note']], ['title', { hole: 0 }]], children: [{ hole: 1 }] }] }
+```
+
