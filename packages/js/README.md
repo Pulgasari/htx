@@ -69,6 +69,7 @@ const view = ({ title, items }) => html`
 render(container, view(state));   // first call clones, later calls patch
 ```
 
-`configure({ effect })` makes a function in a value hole live (`${() => $count}`),
-for a signal library such as `@rat/runtime`. the tag registry is shared with the
+`configure({ effect, scope })` (or the same options per `render()` call) makes a
+function in a value hole live (`${() => $count}`), for a signal library such as
+`@rat/runtime`. `match(subject, cases, otherwise)` picks one of several branches. the tag registry is shared with the
 builder: `html.define()` on either is seen by both.
