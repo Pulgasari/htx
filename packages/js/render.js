@@ -13,9 +13,9 @@ html.define() on either one is seen by both.
 
 // :::::: IMPORT
 
-import { configure, each, isResult, raw, render, tag, unrender, when } from '@domina/render';
-import { program }                                                     from '@htx/htx';
-import { htx }                                                         from './index.js';
+import { configure, each, isResult, match, raw, render, tag, unrender, when } from '@domina/render';
+import { program }                                                            from '@htx/htx';
+import { htx }                                                                from './index.js';
 
 // :::::: TAG
 
@@ -26,5 +26,5 @@ html.tags   = htx.tags;
 
 // :::::: EXPORT
 
-export { configure, each, html, isResult, raw, render, unrender, when };
+export { configure, each, html, isResult, match, raw, render, unrender, when };
 export default html;

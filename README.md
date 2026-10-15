@@ -16,10 +16,12 @@ a fork of [htm](https://github.com/developit/htm) with some syntax sugar added t
 
 | package | path | |
 |---|---|---|
+| [`@htx/analyzer`](https://jsr.io/@htx/analyzer) | [`packages/analyzer`](packages/analyzer) | templates as data for editor tooling: diagnostics, completion, hover, definition |
 | [`@htx/compiler`](https://jsr.io/@htx/compiler) | [`packages/compiler`](packages/compiler) | `.htx` files: markup first, compiled into a component |
 | [`@htx/htx`](https://jsr.io/@htx/htx) | [`packages/htx`](packages/htx) | the core, plus `@htx/htx/markdown` |
 | [`@htx/js`](https://jsr.io/@htx/js) | [`packages/js`](packages/js) | the vanilla DOM adapter |
 | [`@htx/preact`](https://jsr.io/@htx/preact) | [`packages/preact`](packages/preact) | the preact adapter |
+| `@htx/ts-plugin` (npm) | [`packages/ts-plugin`](packages/ts-plugin) | typescript server plugin: htx support in every editor that uses typescript |
 
 ```javascript
 import htx from '@htx/js';
