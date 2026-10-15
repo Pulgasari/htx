@@ -196,12 +196,26 @@ a prop group writes one value to several names:
 
   <$box id|title='example' />   ->  id='example' title='example'
 */
-
+/*
+const HTX = {};
+HTX.ERROR = function (key, ...$) {
+  let msg = {
+    'prop_group' : Error(`[htx] malformed prop group '${$1}'`),
+  }[key];
+  throw new Error(msg);
+}
+*/
 function splitProp (name) {
   if (!name.includes('|')) return [name];
 
   const names = name.split('|');
   if (names.some(part => !part)) throw new Error(`[htx] malformed prop group '${name}'`);
+  /*
+  if (names.some(part => !part)) HTX.ERROR('prop_group', $name);
+  if (names.some(part => !part)) HTX.ERROR['prop_group']($name);
+  if (names.some(part => !part)) HTX.ERROR.propGroup($name);
+  if (names.some(part => !part)) HTX.ERROR[1]($name);
+  */
 
   return names;
 }
