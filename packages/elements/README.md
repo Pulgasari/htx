@@ -76,7 +76,7 @@ document.body.append(Card({ name: 'Ada' }));
 
 ## what it needs
 
-an importmap with `@htx/compiler`, `@htx/js`, `@htx/htx`, `@domina/methods` and
+an importmap with `@htx/compiler`, `@htx/js`, `@htx/htx`, `@domina/verbs` and
 `acorn` (the compiler's parser, `https://esm.sh/acorn@8`).
 
 ## open: kinds of files

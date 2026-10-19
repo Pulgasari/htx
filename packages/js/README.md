@@ -17,7 +17,7 @@ const $panel = htx`
 `;
 ```
 
-props go through `@domina/methods`, so event handlers, `dataset`, `style` objects and the `appendTo` / `prependTo` shortcuts all work. 
+props go through `@domina/verbs`, so event handlers, `dataset`, `style` objects and the `appendTo` / `prependTo` shortcuts all work. 
 
 `ref` gets the node once its children are in, a function is called with it,
 an object gets it as `.current` (as in preact):
