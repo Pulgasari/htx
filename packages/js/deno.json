@@ -7,7 +7,7 @@
     "./render": "./render.js"
   },
   "imports": {
-    "@domina/methods": "jsr:@domina/methods@^0.1.0",
+    "@domina/verbs": "jsr:@domina/verbs@^0.1.0",
     "@domina/render": "jsr:@domina/render@^0.2.0"
   }
 }
