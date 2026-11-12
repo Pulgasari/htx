@@ -35,8 +35,9 @@ definition(template, 106, context);      // { location } or { module, source }
 | `holes` | the role of every `${…}`: `child`, `tag`, `spread`, `positional`, `event`, `ref`, `raw`, `class`, `style`, `prop`, `part`, `closing`, `comment` |
 | `regions` | what sits where: `tagName`, `attrName`, `attrValue`, `closeName`, `tag` (the whole open tag), `text` |
 
-`scan` follows the rules of `build()` in `@htx/htx`, but keeps positions and keeps
-going after an error. Changes to the htx syntax have to be made in both.
+The tree comes from `scanner()` of `@htx/htx`, the one parser of the syntax: the runtime builds its
+templates from the same tree, so there is nothing to keep in step. `scan` only adds what an editor
+asks for, the roles of the holes and the regions.
 
 ## what `analyze` checks
 

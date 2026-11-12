@@ -249,6 +249,27 @@ Note that the lexer hands back *source* text, so `&amp;` written in the
 Markdown is decoded here rather than escaped; that is the one thing a node
 builder has to do in the opposite direction from a string renderer.
 
+## One parser
+
+`scanner()` in `@htx/htx/scan` is the only place the syntax is read. The runtime builds its
+templates from its tree, `@htx/analyzer` adds editor data to it, and the compiler of rat plugs its
+own holes (`{…}`) and blocks (`@if`, `@for` …) into it.
+
+```javascript
+import { scanner } from '@htx/htx/scan';
+
+const p     = scanner(source, { hole, stops, tolerant: true });   // the options are listed in scan.js
+const nodes = p.nodes('eof', { depth: 0 });                       // then p.errors, p.warnings
+```
+
+What the tree settles for every host:
+
+- **void elements** close themselves: `<input>` and `<br>` need no `/>`
+- a `|` inside `[…]` belongs to the name, `on:keydown[ctrl+c|space+a]` is no prop group
+- whitespace around `=` is fine: `title = "x"`
+- a closing tag closes the innermost element whatever it names, a different name is a warning
+- what the scanner reports reaches the console once per template; a malformed prop group throws
+
 ## Writing an adapter
 
 ```javascript

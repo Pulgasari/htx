@@ -103,3 +103,48 @@ export interface Program {
  * prop groups, static shorthand tags and positional values are resolved.
  */
 export function program(statics: TemplateStringsArray | readonly string[], tags?: ShorthandRegistry | null): Program;
+
+/** a node of the tree of scanner(): an element, a text, a hole or a comment, with offsets. see scan.js. */
+export interface ScanNode { type: 'comment' | 'element' | 'hole' | 'text'; start: number; end: number; [key: string]: unknown; }
+
+/** what a host hands to scanner(): its holes, its own nodes and ends, how errors are made. see scan.js. */
+export interface ScanOptions {
+  child?      : (p: Scanner, end: string, context: Record<string, unknown>) => unknown;
+  component?  : (name: string) => boolean;
+  emit?       : (node: ScanNode) => unknown;
+  ends?       : (p: Scanner, end: string, context: Record<string, unknown>) => boolean;
+  error?      : (message: string, index: number) => Error;
+  hole?       : (p: Scanner, where: 'attribute' | 'child' | 'closing' | 'quoted' | 'tag' | 'value') => { value: unknown; spread?: boolean } | undefined;
+  open?       : (p: Scanner, name: string, start: number, context: Record<string, unknown>) => { node: unknown } | undefined;
+  position?   : { start: (index: number) => number; end: (index: number) => number };
+  recover?    : (p: Scanner, from: number, failed: number) => void;
+  stops?      : string;
+  tagStart?   : RegExp;
+  text?       : (p: Scanner, end: string, context: Record<string, unknown>) => unknown;
+  tolerant?   : boolean;
+  unfinished? : (p: Scanner, end: string, context: Record<string, unknown>) => void;
+}
+
+/** the cursor and the entry points of a scan. i is the index in the source. */
+export interface Scanner {
+  i        : number;
+  source   : string;
+  errors   : Error[];
+  warnings : Error[];
+  slips    : { name: string; open: number; written: string }[];
+  nodes (end: string, context: Record<string, unknown>): unknown[];
+  fail (message: string, index?: number, extra?: { code?: string; end?: number; severity?: string }): Error;
+  report (message: string, index?: number, extra?: { code?: string; end?: number }): void;
+  warn (message: string, index?: number, extra?: { code?: string; end?: number }): void;
+  peek (string: string): boolean;
+  skipWhitespace (): RegExpExecArray | null;
+  sticky (regex: RegExp): RegExpExecArray | null;
+}
+
+/** the one parser of the htx syntax: markup -> a tree with positions. */
+export function scanner(source: string, options?: ScanOptions): Scanner;
+
+export const VOID: Set<string>;
+export function elementsOf(nodes: unknown[]): Generator<ScanNode>;
+export function splitProp(name: string): string[];
+export function splitSelector(name: string): { tag: string; id: { name: string; start: number; end: number } | null; classes: { name: string; start: number; end: number }[]; extra: { name: string; start: number; end: number }[] };
