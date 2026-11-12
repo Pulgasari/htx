@@ -35,10 +35,10 @@ options
   ends (p, end, context)        true: the child list ends here
   error (message, index)        makes the error object (thrown, or collected when tolerant)
   hole (p, where)               { value, spread } with p.i behind the hole, or undefined. where: child, attribute, value, quoted, tag, closing
+  holeStart (source, index)     true where a hole may begin: a name and a text end there
   open (p, name, start, context)   { node } for a tag the host reads itself (node may be null), or undefined
   position: { start, end }      index -> offset in the file: of what begins at an index, of what ended before it
   recover (p, from, failed)     where to go on after an error (tolerant)
-  stops                         characters that end a name and a text besides the usual ones: where a hole may begin
   tagStart                      what may follow a < to open an element
   text (p, end, context)        reads a text node its own way
   tolerant                      collect errors and go on, instead of throwing the first
@@ -86,9 +86,8 @@ function splitSelector (name) {
 
 function scanner (source, options = {}) {
   const {
-    child, component, emit, ends, hole, open, recover, text: readText, unfinished,
+    child, component, emit, ends, hole, holeStart, open, recover, text: readText, unfinished,
     position = null,
-    stops    = '',
     tagStart = TAG_START,
     tolerant = false,
   } = options;
@@ -138,7 +137,8 @@ function scanner (source, options = {}) {
 
   const skipWhitespace = () => sticky(WHITESPACE);
 
-  const holeAt = where => hole ? hole(p, where) : undefined;
+  const holeAt  = where => hole ? hole(p, where) : undefined;
+  const mayHole = index => holeStart ? holeStart(source, index) : false;
   const put    = node  => emit ? emit(node) : node;
 
   // ::: nodes
@@ -192,7 +192,7 @@ function scanner (source, options = {}) {
   function text () {
     const start = p.i;
     p.i++;
-    while (p.i < source.length && source[p.i] !== '<' && !stops.includes(source[p.i])) p.i++;
+    while (p.i < source.length && source[p.i] !== '<' && !mayHole(p.i)) p.i++;
     const value = source.slice(start, p.i);
     return { blank: !value.trim(), end: endAt(p.i), start: startAt(start), text: value, type: 'text' };
   }
@@ -356,7 +356,7 @@ function scanner (source, options = {}) {
     const start = p.i;
     while (p.i < source.length) {
       const char = source[p.i];
-      if (isSpace(char) || isQuote(char) || char === '=' || char === '/' || char === '>' || stops.includes(char)) break;
+      if (isSpace(char) || isQuote(char) || char === '=' || char === '/' || char === '>' || mayHole(p.i)) break;
       p.i++;
     }
     return source.slice(start, p.i);
@@ -372,7 +372,7 @@ function scanner (source, options = {}) {
     while (p.i < source.length) {
       const char = source[p.i];
       if (isSpace(char) || char === '>' || (char === '/' && source[p.i + 1] === '>')) break;
-      const found = stops.includes(char) ? holeAt('value') : undefined;
+      const found = mayHole(p.i) ? holeAt('value') : undefined;
       if (found) { if (text) parts.push(text); parts.push({ hole: found.value }); text = ''; }
       else { text += char; p.i++; }
     }
@@ -390,7 +390,7 @@ function scanner (source, options = {}) {
     let text    = '';
 
     while (p.i < source.length && source[p.i] !== quote) {
-      const found = stops.includes(source[p.i]) ? holeAt('quoted') : undefined;
+      const found = mayHole(p.i) ? holeAt('quoted') : undefined;
       if (found) { if (text) parts.push(text); parts.push({ hole: found.value }); text = ''; }
       else text += source[p.i++];
     }

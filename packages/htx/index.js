@@ -204,9 +204,9 @@ function build (statics) {
   let field = 0;
 
   const p = scanner(statics.join(MARK), {
-    hole     : p => p.source[p.i] === MARK ? (p.i++, { value: ++field }) : undefined,
-    stops    : MARK,
-    tolerant : true,
+    hole      : p => p.source[p.i] === MARK ? (p.i++, { value: ++field }) : undefined,
+    holeStart : (source, index) => source[index] === MARK,
+    tolerant  : true,
   });
   const nodes = p.nodes('eof', { depth: 0 });
 

@@ -115,10 +115,10 @@ export interface ScanOptions {
   ends?       : (p: Scanner, end: string, context: Record<string, unknown>) => boolean;
   error?      : (message: string, index: number) => Error;
   hole?       : (p: Scanner, where: 'attribute' | 'child' | 'closing' | 'quoted' | 'tag' | 'value') => { value: unknown; spread?: boolean } | undefined;
+  holeStart?  : (source: string, index: number) => boolean;
   open?       : (p: Scanner, name: string, start: number, context: Record<string, unknown>) => { node: unknown } | undefined;
   position?   : { start: (index: number) => number; end: (index: number) => number };
   recover?    : (p: Scanner, from: number, failed: number) => void;
-  stops?      : string;
   tagStart?   : RegExp;
   text?       : (p: Scanner, end: string, context: Record<string, unknown>) => unknown;
   tolerant?   : boolean;

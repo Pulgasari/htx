@@ -258,7 +258,7 @@ own holes (`{…}`) and blocks (`@if`, `@for` …) into it.
 ```javascript
 import { scanner } from '@htx/htx/scan';
 
-const p     = scanner(source, { hole, stops, tolerant: true });   // the options are listed in scan.js
+const p     = scanner(source, { hole, holeStart, tolerant: true });   // the options are listed in scan.js
 const nodes = p.nodes('eof', { depth: 0 });                       // then p.errors, p.warnings
 ```
 
