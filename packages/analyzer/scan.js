@@ -58,10 +58,10 @@ function scan (statics, holes = []) {
 
   let count = 0;
   const p = scanner(source, {
-    hole     : p => p.source[p.i] === MARK ? (p.i++, { value: count++ }) : undefined,
-    position : { end: index => ends[index] ?? finish, start: index => starts[index] ?? finish },
-    stops    : MARK,
-    tolerant : true,
+    hole      : p => p.source[p.i] === MARK ? (p.i++, { value: count++ }) : undefined,
+    position  : { end: index => ends[index] ?? finish, start: index => starts[index] ?? finish },
+    holeStart : (source, index) => source[index] === MARK,
+    tolerant  : true,
   });
   const nodes = p.nodes('eof', { depth: 0 });
 
