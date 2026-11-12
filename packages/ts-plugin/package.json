@@ -6,7 +6,7 @@
   "main"        : "./index.cjs",
   "files"       : ["index.cjs", "dist", "README.md"],
   "scripts"     : {
-    "build"   : "esbuild src/index.js --bundle --platform=node --format=cjs --target=node18 --alias:@htx/analyzer=../analyzer/index.js --outfile=dist/plugin.cjs",
+    "build"   : "esbuild src/index.js --bundle --platform=node --format=cjs --target=node18 --alias:@htx/analyzer=../analyzer/index.js --alias:@htx/htx/scan=../htx/scan.js --outfile=dist/plugin.cjs",
     "prepack" : "npm run build"
   },
   "peerDependencies" : { "typescript": ">=5" },

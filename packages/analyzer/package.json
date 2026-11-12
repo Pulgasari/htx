@@ -1,0 +1,12 @@
+{
+  "name"         : "@htx/analyzer",
+  "version"      : "0.2.0",
+  "description"  : "htx templates as data for editor tooling: diagnostics, completion, hover, definition",
+  "type"         : "module",
+  "main"         : "./index.js",
+  "types"        : "./index.d.ts",
+  "exports"      : { ".": "./index.js" },
+  "dependencies" : { "@htx/htx": "file:../htx" },
+  "sideEffects"  : false,
+  "license"      : "Apache-2.0"
+}

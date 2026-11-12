@@ -16,7 +16,7 @@
 
 /*
 modified fork of htm (developit/htm). changes vs upstream:
-- MINI branches and treeify removed, build/evaluate/tag-fn collapsed into one file
+- htm's parser is gone: build() writes its opcodes from the tree of scan.js, the one parser of the syntax
 - every prop write goes through setProp/appendProp instead of assigning directly,
   so duplicate class/className/class:* /style survive spreads instead of overwriting
 - empty tag (<>...</>) falls back to Fragment
@@ -27,6 +27,10 @@ modified fork of htm (developit/htm). changes vs upstream:
 - !html names the raw-html escape hatch, which each adapter then writes
 */
 
+// :::::: IMPORT
+
+import { scanner } from './scan.js';
+
 // :::::: HELPERS
 
 const isArray  = Array.isArray;
@@ -36,20 +40,12 @@ const isObject = value => value !== null && typeof value === 'object' && !isArra
 
 // :::::: CONSTANTS
 
-const MODE_SLASH       = 0;
-const MODE_TEXT        = 1;
-const MODE_WHITESPACE  = 2;
-const MODE_TAGNAME     = 3;
-const MODE_COMMENT     = 4;
-const MODE_PROP_SET    = 5;
-const MODE_PROP_APPEND = 6;
-
 const CHILD_APPEND  = 0;
 const CHILD_RECURSE = 2;
 const TAG_SET       = 3;
 const PROPS_ASSIGN  = 4;
-const PROP_SET      = MODE_PROP_SET;
-const PROP_APPEND   = MODE_PROP_APPEND;
+const PROP_SET      = 5;
+const PROP_APPEND   = 6;
 
 // :::::: PROP MERGING
 // class and style collect every write while a tag is built and become one value in
@@ -189,193 +185,83 @@ function evaluate (h, built, fields, args, memo = true) {
   return args;
 }
 
-// :::::: PROP GROUPS
-
-/*
-a prop group writes one value to several names:
-
-  <$box id|title='example' />   ->  id='example' title='example'
-*/
-/*
-const HTX = {};
-HTX.ERROR = function (key, ...$) {
-  let msg = {
-    'prop_group' : Error(`[htx] malformed prop group '${$1}'`),
-  }[key];
-  throw new Error(msg);
-}
-*/
-function splitProp (name) {
-  if (!name.includes('|')) return [name];
-
-  const names = name.split('|');
-  if (names.some(part => !part)) throw new Error(`[htx] malformed prop group '${name}'`);
-  /*
-  if (names.some(part => !part)) HTX.ERROR('prop_group', $name);
-  if (names.some(part => !part)) HTX.ERROR['prop_group']($name);
-  if (names.some(part => !part)) HTX.ERROR.propGroup($name);
-  if (names.some(part => !part)) HTX.ERROR[1]($name);
-  */
-
-  return names;
-}
-
-// :::::: TAG SELECTORS
-
-/*
-a tag name carries its id and classes the way a css selector does:
-
-  <div#main.card.big />   ->  <div id='main' class='card big'>
-  <$icon.big />           ->  the shorthand tag, plus class='big'
-  <.card />               ->  a div, the way emmet reads a selector with no tag
-*/
-
-const SELECTOR = /[.#]/;
-
-function splitSelector (name) {
-  if (!SELECTOR.test(name)) return null;
-
-  const classes = [];
-  let tag = '';
-  let id  = '';
-
-  // a lookahead split keeps the sigils, so each token says what it is
-  for (const token of name.split(/(?=[.#])/)) {
-    const sigil = token[0];
-    const value = token.slice(1);
-
-    if (sigil !== '.' && sigil !== '#') { tag = token; continue; }
-    if (!value) continue; // a dangling '.' or '#' names nothing
-
-    if (sigil === '.') classes.push(value);
-    else if (!id) id = value;
-    else console.warn(`[htx] <${name}> has more than one id: keeping '#${id}', ignoring '#${value}'`);
-  }
-
-  return { tag: tag || 'div', id, classes };
-}
-
 // :::::: BUILD
 
+/*
+a template literal as the opcodes evaluate() runs: the statics are joined with a
+marker where a hole stands, scanned (scan.js) and written out per element as
+
+  TAG_SET, PROP_SET / PROP_APPEND / PROPS_ASSIGN in the order written, then the children
+
+a field of 0 or undefined means a static value, any other one the n-th hole.
+what the scanner reports goes to the console once per template, a malformed
+prop group is thrown: it is a typo rather than a name.
+*/
+
+const MARK = '￿';
+
 function build (statics) {
-  let char, names;
-  let mode    = MODE_TEXT;
-  let buffer  = '';
-  let current = [0];
-  let quote   = '';
-  let quoted  = false;
+  let field = 0;
 
-  const commit = field => {
-    if (mode === MODE_TEXT && (field || (buffer = buffer.replace(/^\s*\n\s*|\s*\n\s*$/g, '')))) {
-      current.push(CHILD_APPEND, field, buffer);
-    }
-    else if (mode === MODE_TAGNAME && (field || buffer)) {
-      const selector = field ? null : splitSelector(buffer);
+  const p = scanner(statics.join(MARK), {
+    hole     : p => p.source[p.i] === MARK ? (p.i++, { value: ++field }) : undefined,
+    stops    : MARK,
+    tolerant : true,
+  });
+  const nodes = p.nodes('eof', { depth: 0 });
 
-      current.push(TAG_SET, field, selector ? selector.tag : buffer);
+  for (const error of [...p.errors, ...p.warnings]) {
+    if (error.code === 'htx-group') throw new Error(`[htx] ${error.text}`);
+    console.warn(`[htx] ${error.text}`);
+  }
 
-      if (selector?.id)             current.push(PROP_SET, 0, selector.id,      'id'   );
-      if (selector?.classes.length) current.push(PROP_SET, 0, selector.classes, 'class');
+  return childrenInto([0], nodes);
+}
 
-      mode = MODE_WHITESPACE;
-    }
-    else if (mode === MODE_WHITESPACE && buffer === '...' && field) {
-      current.push(PROPS_ASSIGN, field, 0);
-    }
-    // a bare interpolation in a tag — <$icon ${name} /> — used to fall through
-    // every branch and be dropped on the floor
-    else if (mode === MODE_WHITESPACE && !buffer && field) {
-      current.push(PROP_SET, field, 0, POSITIONAL);
-    }
-    else if (mode === MODE_WHITESPACE && buffer && !field) {
-      // the quote is the whole distinction: 'bx:search' is a positional value,
-      // a bare word is a boolean attribute (<a disabled>)
-      if (quoted) current.push(PROP_SET, 0, buffer, POSITIONAL);
-      else for (const name of splitProp(buffer)) current.push(PROP_SET, 0, true, name);
-    }
-    else if (mode >= MODE_PROP_SET) {
-      // one op per name in the group, so every name gets the same value and
-      // then the same appends
-      if (buffer || (!field && mode === MODE_PROP_SET)) {
-        for (const name of names) current.push(mode, 0, buffer, name);
-        mode = MODE_PROP_APPEND;
-      }
-      if (field) {
-        for (const name of names) current.push(mode, field, 0, name);
-        mode = MODE_PROP_APPEND;
-      }
-    }
+// a newline with the whitespace around it at the edge of a text is indentation, not content
+const trimText = text => text.replace(/^\s*\n\s*|\s*\n\s*$/g, '');
 
-    buffer = '';
-    quoted = false;
-  };
+function childrenInto (list, nodes) {
+  for (const node of nodes) {
+    if (node.type === 'hole') list.push(CHILD_APPEND, node.hole, '');
+    else if (node.type === 'element') list.push(CHILD_RECURSE, 0, elementInto([0], node));
+    else if (node.type === 'text') {
+      const text = trimText(node.text);
+      if (text) list.push(CHILD_APPEND, undefined, text);
+    }
+  }
+  return list;
+}
 
-  for (let i = 0; i < statics.length; i++) {
-    if (i) {
-      if (mode === MODE_TEXT) commit();
-      commit(i);
+function elementInto (list, node) {
+  if (node.tagHole !== undefined) list.push(TAG_SET, node.tagHole, '');
+  else if (!node.fragment) {
+    list.push(TAG_SET, undefined, node.tag);
+    if (node.id)             list.push(PROP_SET, 0, node.id.name, 'id');
+    if (node.classes.length) list.push(PROP_SET, 0, node.classes.map(item => item.name), 'class');
+  }
+
+  for (const { names, positional, spread, value } of node.attributes) {
+    if (spread) { list.push(PROPS_ASSIGN, value.hole, 0); continue; }
+
+    if (positional) {
+      if (value.kind === 'hole' && !value.quoted) list.push(PROP_SET, value.hole, 0, POSITIONAL);
+      else if (value.kind === 'string' && value.text) list.push(PROP_SET, 0, value.text, POSITIONAL);
+      continue;
     }
 
-    for (let j = 0; j < statics[i].length; j++) {
-      char = statics[i][j];
+    if (value.kind === 'true') { for (const name of names) list.push(PROP_SET, 0, true, name); continue; }
 
-      if (mode === MODE_TEXT) {
-        if (char === '<') {
-          commit();
-          current = [current];
-          mode = MODE_TAGNAME;
-        }
-        else buffer += char;
-      }
-      else if (mode === MODE_COMMENT) {
-        // ignore everything until the last three characters are '-', '-' and '>'
-        if (buffer === '--' && char === '>') {
-          mode = MODE_TEXT;
-          buffer = '';
-        }
-        else buffer = char + buffer[0];
-      }
-      else if (quote) {
-        if (char === quote) { quote = ''; if (mode === MODE_WHITESPACE) quoted = true; }
-        else buffer += char;
-      }
-      else if (char === '"' || char === "'") {
-        quote = char;
-      }
-      else if (char === '>') {
-        commit();
-        mode = MODE_TEXT;
-      }
-      else if (!mode) {} // ignore everything until the tag ends
-      else if (char === '=') {
-        mode   = MODE_PROP_SET;
-        names  = splitProp(buffer);
-        buffer = '';
-      }
-      else if (char === '/' && (mode < MODE_PROP_SET || statics[i][j + 1] === '>')) {
-        commit();
-        if (mode === MODE_TAGNAME) current = current[0];
-        mode = current;
-        (current = current[0]).push(CHILD_RECURSE, 0, mode);
-        mode = MODE_SLASH;
-      }
-      else if (char === ' ' || char === '\t' || char === '\n' || char === '\r') {
-        // <a disabled>
-        commit();
-        mode = MODE_WHITESPACE;
-      }
-      else buffer += char;
-
-      if (mode === MODE_TAGNAME && buffer === '!--') {
-        mode = MODE_COMMENT;
-        current = current[0];
-      }
+    // one op per name and piece, so every name of a group gets the same value and then the same appends
+    const pieces = value.kind === 'parts' ? value.parts : value.kind === 'hole' ? [{ hole: value.hole }] : [value.text];
+    let mode = PROP_SET;
+    for (const piece of pieces) {
+      for (const name of names) typeof piece === 'string' ? list.push(mode, 0, piece, name) : list.push(mode, piece.hole, 0, name);
+      mode = PROP_APPEND;
     }
   }
 
-  commit();
-
-  return current;
+  return childrenInto(list, node.children);
 }
 
 // :::::: SHORTHAND TAGS ::::::::::::::::::::::::::::::::::::::::
@@ -647,4 +533,5 @@ const createHtml = createHTX;
 // :::::: EXPORT
 
 export { createHTX, createHtml, build, evaluate, program, POSITIONAL, RAW_HTML };
+export { VOID, elementsOf, scanner, splitProp, splitSelector } from './scan.js';
 export default createHTX;
