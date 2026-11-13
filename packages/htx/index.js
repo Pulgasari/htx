@@ -452,9 +452,12 @@ function program (statics, tags = null) {
 
   const key = tags ?? NO_TAGS;
   let result = byTags.get(key);
-  if (!result) byTags.set(key, result = { nodes: nodesOf(build(statics), tags) });
+  if (!result) byTags.set(key, result = programOf(statics, tags));
   return result;
 }
+
+// the program of statics, made anew on every call: for a compiler, which writes it into its output
+const programOf = (statics, tags = null) => ({ nodes: nodesOf(build(statics), tags) });
 
 const holeOf = field => ({ hole: field - 1 });
 
@@ -532,6 +535,6 @@ const createHtml = createHTX;
 
 // :::::: EXPORT
 
-export { createHTX, createHtml, build, evaluate, program, POSITIONAL, RAW_HTML };
+export { createHTX, createHtml, build, evaluate, program, programOf, POSITIONAL, RAW_HTML };
 export { VOID, elementsOf, scanner, splitProp, splitSelector } from './scan.js';
 export default createHTX;

@@ -104,6 +104,9 @@ export interface Program {
  */
 export function program(statics: TemplateStringsArray | readonly string[], tags?: ShorthandRegistry | null): Program;
 
+/** the program of statics, made anew on every call: for a compiler that writes it into its output. */
+export function programOf(statics: readonly string[], tags?: ShorthandRegistry | null): Program;
+
 /** a node of the tree of scanner(): an element, a text, a hole or a comment, with offsets. see scan.js. */
 export interface ScanNode { type: 'comment' | 'element' | 'hole' | 'text'; start: number; end: number; [key: string]: unknown; }
 

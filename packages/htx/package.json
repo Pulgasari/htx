@@ -1,6 +1,6 @@
 {
   "name"        : "@htx/htx",
-  "version"     : "0.4.0",
+  "version"     : "0.5.0",
   "description" : "the core of htx: the parser of the syntax (scan), the tag function for h adapters, programs for a renderer",
   "type"        : "module",
   "main"        : "./index.js",
